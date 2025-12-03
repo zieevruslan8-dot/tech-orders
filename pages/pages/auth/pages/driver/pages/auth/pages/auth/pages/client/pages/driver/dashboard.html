@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кабинет водителя | Агрегатор спецтехники</title>
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../../index.html" class="nav-logo">🚜 ТехноАгро</a>
+            <div class="nav-links">
+                <a href="../../index.html">Главная</a>
+                <a href="dashboard.html">Мой кабинет</a>
+                <a href="../auth/login.html" onclick="logout()">Выйти</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Кабинет водителя</h1>
+        <div class="card">
+            <h2>Добро пожаловать, водитель!</h2>
+            <p>Здесь вы можете просматривать доступные заказы.</p>
+            
+            <h3>Доступные заказы:</h3>
+            <div id="availableOrders">
+                <p>Загрузка заказов...</p>
+            </div>
+            
+            <h3>Мои принятые заказы:</h3>
+            <div id="myOrders">
+                <p>У вас пока нет принятых заказов</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../supabase-config.js"></script>
+    <script>
+        async function loadOrders() {
+            // Загружаем доступные заказы
+            const { data: availableOrders, error } = await supabase
+                .from('orders')
+                .select('*')
+                .eq('status', 'open')
+                .order('created_at', { ascending: false });
+            
+            const availableDiv = document.getElementById('availableOrders');
+            if (availableOrders && availableOrders.length > 0) {
+                availableDiv.innerHTML = availableOrders.map(order => `
+                    <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px;">
+                        <strong>${order.title || 'Заказ'}</strong><br>
+                        Описание: ${order.description || 'нет описания'}<br>
+                        <button onclick="takeOrder('${order.id}')" class="btn">Взять заказ</button>
+                    </div>
+                `).join('');
+            } else {
+                availableDiv.innerHTML = '<p>Нет доступных заказов</p>';
+            }
+        }
+        
+        async function takeOrder(orderId) {
+            if (confirm('Вы уверены, что хотите взять этот заказ?')) {
+                const { error } = await supabase
+                    .from('orders')
+                    .update({ status: 'taken', driver_id: (await supabase.auth.getUser()).data.user.id })
+                    .eq('id', orderId);
+                
+                if (!error) {
+                    alert('Заказ принят!');
+                    loadOrders();
+                }
+            }
+        }
+        
+        async function logout() {
+            await supabase.auth.signOut();
+        }
+        
+        supabase.auth.getSession().then(({ data }) => {
+            if (!data.session) {
+                window.location.href = "../auth/login.html";
+            } else {
+                loadOrders();
+            }
+        });
+    </script>
+</body>
+</html>
