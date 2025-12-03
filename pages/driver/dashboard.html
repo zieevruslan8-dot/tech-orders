@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кабинет водителя | ТехноАггрегатор</title>
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .driver-container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #eee;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+        .tab.active {
+            border-bottom-color: #3498db;
+            font-weight: bold;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .order-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .price-tag {
+            background: #2ecc71;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="../../index.html" class="logo">
+                <i class="fas fa-truck-monster"></i>
+                <span>ТехноАггрегатор</span>
+            </a>
+            <div class="nav-links">
+                <a href="../../index.html">Главная</a>
+                <a href="dashboard.html" class="active">Мой кабинет</a>
+                <a href="../auth/login.html" onclick="logout()">Выйти</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="driver-container">
+        <h1>Кабинет водителя</h1>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('available')">Доступные заказы</div>
+            <div class="tab" onclick="switchTab('my')">Мои заказы</div>
+            <div class="tab" onclick="switchTab('completed')">Завершённые</div>
+        </div>
+        
+        <div id="availableTab" class="tab-content active">
+            <h3>Доступные заказы</h3>
+            <div id="availableOrders">
+                <p>Загрузка доступных заказов...</p>
+            </div>
+        </div>
+        
+        <div id="myTab" class="tab-content">
+            <h3>Мои текущие заказы</h3>
+            <div id="myOrders">
+                <p>У вас пока нет принятых заказов</p>
+            </div>
+        </div>
+        
+        <div id="completedTab" class="tab-content">
+            <h3>Завершённые заказы</h3>
+            <div id="completedOrders">
+                <p>Нет завершённых заказов</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../supabase-config.js"></script>
+    <script>
+        let currentUserId = null;
+        
+        function switchTab(tabName) {
+            // Переключение вкладок
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            document.querySelector(`.tab[onclick*="${tabName}"]`).classList.add('active');
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            
+            // Загрузка данных для вкладки
+            if (tabName === 'available') loadAvailableOrders();
+            else if (tabName === 'my') loadMyOrders();
+            else if (tabName === 'completed') loadCompletedOrders();
+        }
+        
+        async function loadAvailableOrders() {
+            const { data: orders, error } = await supabase
+                .from('orders')
+                .select('*')
+                .eq('status', 'open')
+                .order('created_at', { ascending: false });
+            
+            const container = document.getElementById('availableOrders');
+            if (error || !orders.length) {
+                container.innerHTML = '<p>Нет доступных заказов</p>';
+                return;
+            }
+            
+            container.innerHTML = orders.map(order => `
+                <div class="order-card">
+                    <div class="order-header">
+                        <h4>${order.title || 'Заказ без названия'}</h4>
+                        <div class="price-tag">${order.budget ? order.budget + '₽' : 'Договорная'}</div>
+                    </div>
+                    <p>${order.description || 'Нет описания'}</p>
+                    <p><strong>Тип техники:</strong> ${getVehicleTypeName(order.vehicle_type)}</p>
+                    <p><strong>Локация:</strong> ${order.location || 'Не указана'}</p>
+                    <p><strong>Срок:</strong> ${order.deadline ? new Date(order.deadline).toLocaleDateString() : 'Не указан'}</p>
+                    <button onclick="takeOrder('${order.id}')" class="btn btn-primary">
+                        <i class="fas fa-check"></i> Взять заказ
+                    </button>
+                </div>
+            `).join('');
+        }
+        
+        async function loadMyOrders() {
+            if (!currentUserId) return;
+            
+            const { data: orders, error } = await supabase
+                .from('orders')
+                .select('*')
+                .eq('driver_id', currentUserId)
+                .neq('status', 'completed')
+                .order('created_at', { ascending: false });
+            
+            const container = document.getElementById('myOrders');
+            if (error || !orders.length) {
+                container.innerHTML = '<p>У вас пока нет принятых заказов</p>';
+                return;
+            }
+            
+            container.innerHTML = orders.map(order => `
+                <div class="order-card">
+                    <h4>${order.title || 'Заказ без названия'}</h4>
+                    <p><strong>Статус:</strong> ${getStatusName(order.status)}</p>
+                    <p><strong>Клиент:</strong> ${order.client_email || 'Не указан'}</p>
+                    <button onclick="completeOrder('${order.id}')" class="btn btn-success">
+                        <i class="fas fa-flag-checkered"></i> Завершить заказ
+                    </button>
+                </div>
+            `).join('');
+        }
+        
+        async function loadCompletedOrders() {
+            if (!currentUserId) return;
+            
+            const { data: orders, error } = await supabase
+                .from('orders')
+                .select('*')
+                .eq('driver_id', currentUserId)
+                .eq('status', 'completed')
+                .order('created_at', { ascending: false });
+            
+            const container = document.getElementById('completedOrders');
+            if (error || !orders.length) {
+                container.innerHTML = '<p>Нет завершённых заказов</p>';
+                return;
+            }
+            
+            container.innerHTML = orders.map(order => `
+                <div class="order-card">
+                    <h4>${order.title || 'Заказ без названия'}</h4>
+                    <p><strong>Завершён:</strong> ${order.completed_at ? new Date(order.completed_at).toLocaleDateString() : 'Дата не указана'}</p>
+                    <p><strong>Оплата:</strong> ${order.budget ? order.budget + '₽' : 'Договорная'}</p>
+                </div>
+            `).join('');
+        }
+        
+        async function takeOrder(orderId) {
+            if (!confirm('Вы уверены, что хотите взять этот заказ?')) return;
+            
+            const { error } = await supabase
+                .from('orders')
+                .update({ 
+                    status: 'taken', 
+                    driver_id: currentUserId,
+                    taken_at: new Date()
+                })
+                .eq('id', orderId);
+            
+            if (!error) {
+                alert('Заказ успешно принят!');
+                loadAvailableOrders();
+                switchTab('my');
+            }
+        }
+        
+        async function completeOrder(orderId) {
+            if (!confirm('Завершить заказ?')) return;
+            
+            const { error } = await supabase
+                .from('orders')
+                .update({ 
+                    status: 'completed',
+                    completed_at: new Date()
+                })
+                .eq('id', orderId);
+            
+            if (!error) {
+                alert('Заказ завершён!');
+                loadMyOrders();
+                switchTab('completed');
+            }
+        }
+        
+        function getVehicleTypeName(type) {
+            const types = {
+                'excavator': 'Экскаватор',
+                'truck': 'Грузовик',
+                'crane': 'Кран',
+                'bulldozer': 'Бульдозер',
+                'loader': 'Погрузчик'
+            };
+            return types[type] || type;
+        }
+        
+        function getStatusName(status) {
+            const statuses = {
+                'open': 'Открыт',
+                'taken': 'Принят',
+                'in_progress': 'В работе',
+                'completed': 'Завершён'
+            };
+            return statuses[status] || status;
+        }
+        
+        async function logout() {
+            await supabase.auth.signOut();
+            window.location.href = "../auth/login.html";
+        }
+        
+        // Инициализация
+        supabase.auth.getSession().then(async ({ data }) => {
+            if (!data.session) {
+                window.location.href = "../auth/login.html";
+            } else {
+                currentUserId = data.session.user.id;
+                loadAvailableOrders();
+            }
+        });
+    </script>
+</body>
+</html>
