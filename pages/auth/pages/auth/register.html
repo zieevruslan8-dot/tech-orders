@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация | ТехноАггрегатор</title>
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="../../index.html" class="logo">
+                <i class="fas fa-truck-monster"></i>
+                <span>ТехноАггрегатор</span>
+            </a>
+            <div class="nav-links">
+                <a href="../../index.html">Главная</a>
+                <a href="login.html">Вход</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" style="max-width: 400px; margin: 50px auto;">
+        <h1 style="text-align: center;">Регистрация</h1>
+        <div class="card">
+            <form id="registerForm">
+                <div style="margin-bottom: 15px;">
+                    <label>Имя:</label>
+                    <input type="text" id="firstName" required style="width: 100%; padding: 10px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label>Email:</label>
+                    <input type="email" id="email" required style="width: 100%; padding: 10px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label>Пароль:</label>
+                    <input type="password" id="password" required style="width: 100%; padding: 10px;">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label>Выберите роль:</label>
+                    <select id="role" style="width: 100%; padding: 10px;">
+                        <option value="client">Клиент</option>
+                        <option value="driver">Водитель</option>
+                        <option value="fleet">Автопарк</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Зарегистрироваться</button>
+            </form>
+            <p style="margin-top: 20px; text-align: center;">
+                Уже есть аккаунт? <a href="login.html">Войдите</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../supabase-config.js"></script>
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const firstName = document.getElementById('firstName').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+            
+            const { data, error } = await supabase.auth.signUp({
+                email: email,
+                password: password,
+                options: {
+                    data: {
+                        first_name: firstName,
+                        role: role
+                    }
+                }
+            });
+            
+            if (error) {
+                alert('Ошибка: ' + error.message);
+            } else {
+                alert('Регистрация успешна! Проверьте email для подтверждения.');
+                window.location.href = "login.html";
+            }
+        });
+    </script>
+</body>
+</html>0
