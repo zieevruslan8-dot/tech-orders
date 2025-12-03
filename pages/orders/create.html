@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создание заказа | ТехноАггрегатор</title>
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .order-create-container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+        .form-section {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .form-step {
+            display: none;
+        }
+        .form-step.active {
+            display: block;
+        }
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        .step-indicator:before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #eee;
+            z-index: 1;
+        }
+        .step {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            flex: 1;
+        }
+        .step-number {
+            width: 32px;
+            height: 32px;
+            background: #eee;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-weight: bold;
+        }
+        .step.active .step-number {
+            background: #3498db;
+            color: white;
+        }
+        .step.completed .step-number {
+            background: #2ecc71;
+            color: white;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        .vehicle-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .vehicle-option {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .vehicle-option:hover {
+            border-color: #3498db;
+        }
+        .vehicle-option.selected {
+            border-color: #3498db;
+            background: #ebf5fb;
+        }
+        .vehicle-option i {
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="../../index.html" class="logo">
+                <i class="fas fa-truck-monster"></i>
+                <span>ТехноАггрегатор</span>
+            </a>
+            <div class="nav-links">
+                <a href="../../index.html">Главная</a>
+                <a href="../client/dashboard.html">Мой кабинет</a>
+                <a href="create.html" class="active">Создать заказ</a>
+                <a href="../auth/login.html" onclick="logout()">Выйти</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="order-create-container">
+        <h1>Создание нового заказа</h1>
+        
+        <div class="step-indicator">
+            <div class="step active" data-step="1">
+                <div class="step-number">1</div>
+                <div>Выбор техники</div>
+            </div>
+            <div class="step" data-step="2">
+                <div class="step-number">2</div>
+                <div>Детали заказа</div>
+            </div>
+            <div class="step" data-step="3">
+                <div class="step-number">3</div>
+                <div>Подтверждение</div>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <form id="createOrderForm">
+                <!-- Шаг 1: Выбор техники -->
+                <div class="form-step active" data-step="1">
+                    <h2>Выберите тип техники</h2>
+                    <div class="vehicle-options">
+                        <div class="vehicle-option" data-type="excavator" onclick="selectVehicleType('excavator')">
+                            <i class="fas fa-digging"></i>
+                            <h4>Экскаватор</h4>
+                            <p>Земляные работы, копание</p>
+                        </div>
+                        <div class="vehicle-option" data-type="truck" onclick="selectVehicleType('truck')">
+                            <i class="fas fa-truck-moving"></i>
+                            <h4>Грузовик</h4>
+                            <p>Перевозка грузов</p>
+                        </div>
+                        <div class="vehicle-option" data-type="crane" onclick="selectVehicleType('crane')">
+                            <i class="fas fa-crane"></i>
+                            <h4>Кран</h4>
+                            <p>Подъёмные работы</p>
+                        </div>
+                        <div class="vehicle-option" data-type="bulldozer" onclick="selectVehicleType('bulldozer')">
+                            <i class="fas fa-tractor"></i>
+                            <h4>Бульдозер</h4>
+                            <p>Выравнивание грунта</p>
+                        </div>
+                        <div class="vehicle-option" data-type="loader" onclick="selectVehicleType('loader')">
+                            <i class="fas fa-snowplow"></i>
+                            <h4>Погрузчик</h4>
+                            <p>Погрузочно-разгрузочные</p>
+                        </div>
+                        <div class="vehicle-option" data-type="concrete_mixer" onclick="selectVehicleType('concrete_mixer')">
+                            <i class="fas fa-mixer"></i>
+                            <h4>Бетономешалка</h4>
+                            <p>Бетонные работы</p>
+                        </div>
+                    </div>
+                    <input type="hidden" id="vehicleType" required>
+                    
+                    <div class="form-actions">
+                        <div></div>
+                        <button type="button" onclick="nextStep()" class="btn btn-primary">
+                            Далее <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Шаг 2: Детали заказа -->
+                <div class="form-step" data-step="2">
+                    <h2>Детали заказа</h2>
+                    
+                    <div class="form-group">
+                        <label for="orderTitle">Название заказа *</label>
+                        <input type="text" id="orderTitle" required placeholder="Например: Перевозка строительных материалов">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="orderDescription">Подробное описание *</label>
+                        <textarea id="orderDescription" required placeholder="Опишите детали работы, требования к технике, особенности задачи..."></textarea>
+                    </div>
+                    
+                    <div style="display: flex; gap: 20px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="location">Местоположение *</label>
+                            <input type="text" id="location" required placeholder="Город, адрес, район">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="deadline">Срок выполнения</label>
+                            <input type="date" id="deadline">
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 20px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="budget">Бюджет (₽)</label>
+                            <input type="number" id="budget" min="0" placeholder="0">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="duration">Продолжительность</label>
+                            <select id="duration">
+                                <option value="">Не указано</option>
+                                <option value="1">1 день</option>
+                                <option value="3">2-3 дня</option>
+                                <option value="7">Неделя</option>
+                                <option value="30">Месяц</option>
+                                <option value="custom">Другое</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" onclick="prevStep()" class="btn btn-outline">
+                            <i class="fas fa-arrow-left"></i> Назад
+                        </button>
+                        <button type="button" onclick="nextStep()" class="btn btn-primary">
+                            Далее <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Шаг 3: Подтверждение -->
+                <div class="form-step" data-step="3">
+                    <h2>Подтверждение заказа</h2>
+                    
+                    <div class="card" style="margin-bottom: 20px;">
+                        <h3>Сводка заказа</h3>
+                        <div id="orderSummary">
+                            <!-- Сюда вставляется сводка -->
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="contactPhone">Контактный телефон *</label>
+                        <input type="tel" id="contactPhone" required placeholder="+7 (999) 999-99-99">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="additionalInfo">Дополнительная информация</label>
+                        <textarea id="additionalInfo" placeholder="Особые требования, пожелания..."></textarea>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" onclick="prevStep()" class="btn btn-outline">
+                            <i class="fas fa-arrow-left"></i> Назад
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check"></i> Создать заказ
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../supabase-config.js"></script>
+    <script>
+        let currentStep = 1;
+        let selectedVehicleType = '';
+        
+        function selectVehicleType(type) {
+            selectedVehicleType = type;
+            document.getElementById('vehicleType').value = type;
+            
+            // Сбрасываем выделение у всех вариантов
+            document.querySelectorAll('.vehicle-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Выделяем выбранный вариант
+            document.querySelector(`.vehicle-option[data-type="${type}"]`).classList.add('selected');
+        }
+        
+        function updateStepIndicator() {
+            document.querySelectorAll('.step').forEach(step => {
+                const stepNum = parseInt(step.dataset.step);
+                step.classList.remove('active', 'completed');
+                
+                if (stepNum === currentStep) {
+                    step.classList.add('active');
+                } else if (stepNum < currentStep) {
+                    step.classList.add('completed');
+                }
+            });
+            
+            document.querySelectorAll('.form-step').forEach(step => {
+                step.classList.remove('active');
+                if (parseInt(step.dataset.step) === currentStep) {
+                    step.classList.add('active');
+                }
+            });
+        }
+        
+        function nextStep() {
+            // Валидация перед переходом
+            if (currentStep === 1 && !selectedVehicleType) {
+                alert('Пожалуйста, выберите тип техники');
+                return;
+            }
+            
+            if (currentStep === 2) {
+                const title = document.getElementById('orderTitle').value;
+                const description = document.getElementById('orderDescription').value;
+                const location = document.getElementById('location').value;
+                
+                if (!title || !description || !location) {
+                    alert('Пожалуйста, заполните все обязательные поля (отмечены *)');
+                    return;
+                }
+                
+                // Обновляем сводку на шаге 3
+                updateOrderSummary();
+            }
+            
+            if (currentStep < 3) {
+                currentStep++;
+                updateStepIndicator();
+            }
+        }
+        
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                updateStepIndicator();
+            }
+        }
+        
+        function updateOrderSummary() {
+            const summary = document.getElementById('orderSummary');
+            const vehicleTypeNames = {
+                'excavator': 'Экскаватор',
+                'truck': 'Грузовик',
+                'crane': 'Кран',
+                'bulldozer': 'Бульдозер',
+                'loader': 'Погрузчик',
+                'concrete_mixer': 'Бетономешалка'
+            };
+            
+            summary.innerHTML = `
+                <p><strong>Тип техники:</strong> ${vehicleTypeNames[selectedVehicleType] || selectedVehicleType}</p>
+                <p><strong>Название:</strong> ${document.getElementById('orderTitle').value}</p>
+                <p><strong>Описание:</strong> ${document.getElementById('orderDescription').value.substring(0, 100)}${document.getElementById('orderDescription').value.length > 100 ? '...' : ''}</p>
+                <p><strong>Местоположение:</strong> ${document.getElementById('location').value}</p>
+                <p><strong>Срок выполнения:</strong> ${document.getElementById('deadline').value || 'Не указан'}</p>
+                <p><strong>Бюджет:</strong> ${document.getElementById('budget').value ? document.getElementById('budget').value + '₽' : 'Договорная'}</p>
+            `;
+        }
+        
+        document.getElementById('createOrderForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Собираем данные
+            const orderData = {
+                title: document.getElementById('orderTitle').value,
+                description: document.getElementById('orderDescription').value,
+                vehicle_type: selectedVehicleType,
+                location: document.getElementById('location').value,
+                deadline: document.getElementById('deadline').value || null,
+                budget: document.getElementById('budget').value || null,
+                duration: document.getElementById('duration').value,
+                contact_phone: document.getElementById('contactPhone').value,
+                additional_info: document.getElementById('additionalInfo').value,
+                status: 'open',
+                created_at: new Date().toISOString()
+            };
+            
+            try {
+                // Получаем текущего пользователя
+                const { data: userData } = await supabase.auth.getSession();
+                if (!userData.session) {
+                    alert('Пожалуйста, войдите в систему');
+                    window.location.href = "../auth/login.html";
+                    return;
+                }
+                
+                // Добавляем ID пользователя к данным заказа
+                orderData.user_id = userData.session.user.id;
+                orderData.client_email = userData.session.user.email;
+                
+                // Сохраняем заказ в базу данных
+                const { data, error } = await supabase
+                    .from('orders')
+                    .insert(orderData)
+                    .select()
+                    .single();
+                
+                if (error) throw error;
+                
+                // Успех!
+                alert('Заказ успешно создан! Водители увидят его в списке доступных заказов.');
+                window.location.href = "../client/dashboard.html";
+                
+            } catch (error) {
+                alert('Ошибка при создании заказа: ' + error.message);
+                console.error('Order creation error:', error);
+            }
+        });
+        
+        async function logout() {
+            await supabase.auth.signOut();
+            window.location.href = "../auth/login.html";
+        }
+        
+        // Проверяем авторизацию при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            supabase.auth.getSession().then(({ data }) => {
+                if (!data.session) {
+                    window.location.href = "../auth/login.html";
+                }
+            });
+            
+            // Устанавливаем минимальную дату как сегодня
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('deadline').min = today;
+        });
+    </script>
+</body>
+</html>
