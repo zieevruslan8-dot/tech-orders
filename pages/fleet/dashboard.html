@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кабинет автопарка | ТехноАггрегатор</title>
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="../../index.html" class="logo">
+                <i class="fas fa-truck-monster"></i>
+                <span>ТехноАггрегатор</span>
+            </a>
+            <div class="nav-links">
+                <a href="../../index.html">Главная</a>
+                <a href="dashboard.html">Мой автопарк</a>
+                <a href="../auth/login.html" onclick="logout()">Выйти</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Кабинет автопарка</h1>
+        <div class="card">
+            <h2>Управление автопарком</h2>
+            <p>Добавляйте и управляйте своей спецтехникой.</p>
+            
+            <div style="margin: 30px 0;">
+                <button onclick="addVehicle()" class="btn btn-primary">➕ Добавить технику</button>
+            </div>
+            
+            <h3>Моя техника:</h3>
+            <div id="vehiclesList">
+                <p>Загрузка техники...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../supabase-config.js"></script>
+    <script>
+        async function loadVehicles() {
+            const { data: vehicles, error } = await supabase
+                .from('vehicles')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            const vehiclesDiv = document.getElementById('vehiclesList');
+            if (vehicles && vehicles.length > 0) {
+                vehiclesDiv.innerHTML = vehicles.map(vehicle => `
+                    <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px;">
+                        <strong>${vehicle.name || 'Техника'}</strong><br>
+                        Тип: ${vehicle.type || 'не указан'}<br>
+                        Статус: ${vehicle.status || 'свободна'}
+                    </div>
+                `).join('');
+            } else {
+                vehiclesDiv.innerHTML = '<p>У вас пока нет техники</p>';
+            }
+        }
+        
+        function addVehicle() {
+            const name = prompt('Название техники:');
+            const type = prompt('Тип техники (экскаватор, грузовик и т.д.):');
+            if (name && type) {
+                // Здесь будет добавление в базу
+                alert('Техника добавлена!');
+                loadVehicles();
+            }
+        }
+        
+        async function logout() {
+            await supabase.auth.signOut();
+            window.location.href = "../auth/login.html";
+        }
+        
+        supabase.auth.getSession().then(({ data }) => {
+            if (!data.session) {
+                window.location.href = "../auth/login.html";
+            } else {
+                loadVehicles();
+            }
+        });
+    </script>
+</body>
+</html>
