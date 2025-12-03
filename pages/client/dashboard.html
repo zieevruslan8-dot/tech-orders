@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кабинет клиента | ТехноАггрегатор</title>
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .dashboard-container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #3498db;
+        }
+        .orders-table {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        .status-new { background: #e3f2fd; color: #1976d2; }
+        .status-inwork { background: #fff3e0; color: #f57c00; }
+        .status-done { background: #e8f5e9; color: #388e3c; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="../../index.html" class="logo">
+                <i class="fas fa-truck-monster"></i>
+                <span>ТехноАггрегатор</span>
+            </a>
+            <div class="nav-links">
+                <a href="../../index.html">Главная</a>
+                <a href="dashboard.html" class="active">Мой кабинет</a>
+                <a href="../orders/create.html">Создать заказ</a>
+                <a href="../auth/login.html" onclick="logout()">Выйти</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <h1>Кабинет клиента</h1>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalOrders">0</div>
+                <div>Всего заказов</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="activeOrders">0</div>
+                <div>Активные заказы</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="completedOrders">0</div>
+                <div>Завершённые</div>
+            </div>
+        </div>
+        
+        <div style="margin: 30px 0;">
+            <a href="../orders/create.html" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Создать новый заказ
+            </a>
+        </div>
+        
+        <div class="orders-table">
+            <h3>Мои заказы</h3>
+            <div id="ordersList">
+                <p>Загрузка заказов...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../supabase-config.js"></script>
+    <script>
+        async function loadOrders() {
+            const { data: orders, error } = await supabase
+                .from('orders')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            const ordersList = document.getElementById('ordersList');
+            
+            if (error) {
+                ordersList.innerHTML = '<p>Ошибка загрузки заказов</p>';
+                return;
+            }
+            
+            // Обновляем статистику
+            document.getElementById('totalOrders').textContent = orders.length;
+            document.getElementById('activeOrders').textContent = orders.filter(o => o.status !== 'completed').length;
+            document.getElementById('completedOrders').textContent = orders.filter(o => o.status === 'completed').length;
+            
+            if (orders.length === 0) {
+                ordersList.innerHTML = '<p>У вас пока нет заказов</p>';
+            } else {
+                ordersList.innerHTML = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Название</th>
+                                <th>Тип техники</th>
+                                <th>Статус</th>
+                                <th>Дата</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${orders.map(order => `
+                                <tr>
+                                    <td>#${order.id.substring(0, 8)}</td>
+                                    <td>${order.title || 'Без названия'}</td>
+                                    <td>${getVehicleTypeName(order.vehicle_type)}</td>
+                                    <td><span class="status status-${order.status || 'new'}">${getStatusName(order.status)}</span></td>
+                                    <td>${new Date(order.created_at).toLocaleDateString()}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            }
+        }
+        
+        function getVehicleTypeName(type) {
+            const types = {
+                'excavator': 'Экскаватор',
+                'truck': 'Грузовик',
+                'crane': 'Кран',
+                'bulldozer': 'Бульдозер',
+                'loader': 'Погрузчик'
+            };
+            return types[type] || type;
+        }
+        
+        function getStatusName(status) {
+            const statuses = {
+                'new': 'Новый',
+                'inwork': 'В работе',
+                'completed': 'Завершён'
+            };
+            return statuses[status] || status;
+        }
+        
+        async function logout() {
+            await supabase.auth.signOut();
+            window.location.href = "../auth/login.html";
+        }
+        
+        // Проверяем авторизацию
+        supabase.auth.getSession().then(({ data }) => {
+            if (!data.session) {
+                window.location.href = "../auth/login.html";
+            } else {
+                loadOrders();
+            }
+        });
+    </script>
+</body>
+</html>
