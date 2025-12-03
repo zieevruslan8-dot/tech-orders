@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ТехноАггрегатор - Заказ спецтехники</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">
+                <i class="fas fa-truck-monster"></i>
+                <span>ТехноАггрегатор</span>
+            </a>
+            <div class="nav-links">
+                <a href="#how-it-works">Как работает</a>
+                <a href="#technics">Техника</a>
+                <a href="#pricing">Тарифы</a>
+                <a href="pages/auth/login.html" class="btn btn-outline">Войти</a>
+                <a href="pages/auth/register.html" class="btn btn-primary">Регистрация</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Герой секция -->
+    <section class="hero">
+        <div class="container">
+            <h1>Закажите спецтехнику за 5 минут</h1>
+            <p class="subtitle">Экскаваторы, краны, грузовики и другая техника от проверенных парков</p>
+            
+            <!-- Форма быстрого заказа -->
+            <div class="quick-order-form">
+                <div class="form-group">
+                    <label for="tech-type"><i class="fas fa-truck-pickup"></i> Тип техники</label>
+                    <select id="tech-type">
+                        <option value="">Выберите технику</option>
+                        <option value="excavator">Экскаватор</option>
+                        <option value="crane">Кран</option>
+                        <option value="truck">Грузовик</option>
+                        <option value="bulldozer">Бульдозер</option>
+                        <option value="loader">Погрузчик</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="location"><i class="fas fa-map-marker-alt"></i> Местоположение</label>
+                    <input type="text" id="location" placeholder="Куда доставить технику?">
+                </div>
+                <div class="form-group">
+                    <label for="date"><i class="fas fa-calendar-alt"></i> Дата работы</label>
+                    <input type="date" id="date">
+                </div>
+                <button class="btn btn-primary btn-large">
+                    <i class="fas fa-search"></i> Найти технику
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Как работает -->
+    <section id="how-it-works" class="section">
+        <div class="container">
+            <h2 class="section-title">Как это работает</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-icon">1</div>
+                    <h3>Создайте заказ</h3>
+                    <p>Опишите задачу и выберите тип техники</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">2</div>
+                    <h3>Получите предложения</h3>
+                    <p>Парки техники отправят вам свои цены</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">3</div>
+                    <h3>Выберите исполнителя</h3>
+                    <p>Сравните цены и отзывы, выберите лучший вариант</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">4</div>
+                    <h3>Работайте безопасно</h3>
+                    <p>Все платежи через платформу с гарантией</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Роли пользователей -->
+    <section class="section bg-light">
+        <div class="container">
+            <h2 class="section-title">Для кого наша платформа</h2>
+            <div class="roles">
+                <div class="role-card">
+                    <i class="fas fa-hard-hat"></i>
+                    <h3>Заказчики</h3>
+                    <p>Строительные компании, частные лица, организации</p>
+                    <a href="pages/auth/register.html?role=client" class="btn btn-outline">Стать заказчиком</a>
+                </div>
+                <div class="role-card">
+                    <i class="fas fa-truck"></i>
+                    <h3>Водители</h3>
+                    <p>Ищите заказы, работайте с проверенными клиентами</p>
+                    <a href="pages/auth/register.html?role=driver" class="btn btn-outline">Стать водителем</a>
+                </div>
+                <div class="role-card">
+                    <i class="fas fa-warehouse"></i>
+                    <h3>Парки техники</h3>
+                    <p>Привлекайте клиентов, управляйте автопарком</p>
+                    <a href="pages/auth/register.html?role=fleet" class="btn btn-outline">Добавить парк</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>ТехноАггрегатор</h4>
+                    <p>Агрегатор заказов на спецтехнику №1</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Контакты</h4>
+                    <p><i class="fas fa-phone"></i> 8-800-123-45-67</p>
+                    <p><i class="fas fa-envelope"></i> info@tech-aggregator.ru</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Документы</h4>
+                    <a href="#">Пользовательское соглашение</a>
+                    <a href="#">Политика конфиденциальности</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2024 ТехноАггрегатор. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+  </html>
