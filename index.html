@@ -24,23 +24,41 @@
                 <a href="#how-it-works">Как работает</a>
                 <a href="#technics">Техника</a>
                 <a href="#pricing">Тарифы</a>
+                <!-- ИЗМЕНЕНО: Исправлены пути -->
                 <a href="pages/auth/login.html" class="btn btn-outline">Войти</a>
                 <a href="pages/auth/register.html" class="btn btn-primary">Регистрация</a>
             </div>
             
             <!-- Для авторизованных пользователей -->
             <div class="nav-links logged-in" style="display: none;">
+                <!-- ИЗМЕНЕНО: Исправлены пути -->
                 <a href="pages/client/dashboard.html" class="btn btn-outline">
                     <i class="fas fa-tachometer-alt"></i> Личный кабинет
                 </a>
                 <a href="pages/orders/create.html" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Новый заказ
                 </a>
-                <div class="user-menu">
-                    <span class="user-email">user@example.com</span>
-                    <button onclick="logout()" class="btn btn-link">
-                        <i class="fas fa-sign-out-alt"></i> Выйти
+                <!-- ДОБАВЛЕНО: Ссылки для других ролей -->
+                <div class="dropdown">
+                    <button class="btn btn-outline dropdown-toggle">
+                        <i class="fas fa-user"></i> Меню
                     </button>
+                    <div class="dropdown-menu">
+                        <!-- ИЗМЕНЕНО: Исправлены пути -->
+                        <a href="pages/driver/dashboard.html" class="dropdown-item">
+                            <i class="fas fa-truck"></i> Кабинет водителя
+                        </a>
+                        <a href="pages/fleet/dashboard.html" class="dropdown-item">
+                            <i class="fas fa-warehouse"></i> Кабинет автопарка
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="pages/client/dashboard.html" class="dropdown-item">
+                            <i class="fas fa-user"></i> Профиль
+                        </a>
+                        <a href="#" onclick="logout()" class="dropdown-item">
+                            <i class="fas fa-sign-out-alt"></i> Выйти
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -76,6 +94,19 @@
                 <button class="btn btn-primary btn-large" onclick="handleQuickSearch()">
                     <i class="fas fa-search"></i> Найти технику
                 </button>
+            </div>
+            
+            <!-- ДОБАВЛЕНО: Быстрые ссылки для тестирования -->
+            <div class="quick-links" style="margin-top: 30px; text-align: center;">
+                <p style="color: #666; margin-bottom: 10px;">Тестовые страницы:</p>
+                <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                    <a href="pages/auth/login.html" class="btn btn-sm btn-outline">Вход</a>
+                    <a href="pages/auth/register.html" class="btn btn-sm btn-outline">Регистрация</a>
+                    <a href="pages/client/dashboard.html" class="btn btn-sm btn-outline">Кабинет клиента</a>
+                    <a href="pages/driver/dashboard.html" class="btn btn-sm btn-outline">Кабинет водителя</a>
+                    <a href="pages/fleet/dashboard.html" class="btn btn-sm btn-outline">Кабинет автопарка</a>
+                    <a href="pages/orders/create.html" class="btn btn-sm btn-outline">Создать заказ</a>
+                </div>
             </div>
         </div>
     </section>
@@ -118,19 +149,55 @@
                     <i class="fas fa-hard-hat"></i>
                     <h3>Заказчики</h3>
                     <p>Строительные компании, частные лица, организации</p>
+                    <!-- ИЗМЕНЕНО: Исправлен путь -->
                     <a href="pages/auth/register.html?role=client" class="btn btn-outline">Стать заказчиком</a>
                 </div>
                 <div class="role-card">
                     <i class="fas fa-truck"></i>
                     <h3>Водители</h3>
                     <p>Ищите заказы, работайте с проверенными клиентами</p>
+                    <!-- ИЗМЕНЕНО: Исправлен путь -->
                     <a href="pages/auth/register.html?role=driver" class="btn btn-outline">Стать водителем</a>
                 </div>
                 <div class="role-card">
                     <i class="fas fa-warehouse"></i>
                     <h3>Парки техники</h3>
                     <p>Привлекайте клиентов, управляйте автопарком</p>
+                    <!-- ИЗМЕНЕНО: Исправлен путь -->
                     <a href="pages/auth/register.html?role=fleet" class="btn btn-outline">Добавить парк</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ДОБАВЛЕНО: Информация о страницах -->
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">Доступные страницы</h2>
+            <div class="pages-grid">
+                <div class="page-card">
+                    <h3><i class="fas fa-sign-in-alt"></i> Авторизация</h3>
+                    <p>Вход и регистрация в системе</p>
+                    <div class="page-links">
+                        <a href="pages/auth/login.html" class="btn btn-sm">Вход</a>
+                        <a href="pages/auth/register.html" class="btn btn-sm">Регистрация</a>
+                    </div>
+                </div>
+                <div class="page-card">
+                    <h3><i class="fas fa-tachometer-alt"></i> Личные кабинеты</h3>
+                    <p>Управление заказами и профилем</p>
+                    <div class="page-links">
+                        <a href="pages/client/dashboard.html" class="btn btn-sm">Клиент</a>
+                        <a href="pages/driver/dashboard.html" class="btn btn-sm">Водитель</a>
+                        <a href="pages/fleet/dashboard.html" class="btn btn-sm">Автопарк</a>
+                    </div>
+                </div>
+                <div class="page-card">
+                    <h3><i class="fas fa-plus-circle"></i> Заказы</h3>
+                    <p>Создание и управление заказами</p>
+                    <div class="page-links">
+                        <a href="pages/orders/create.html" class="btn btn-sm">Создать заказ</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -150,9 +217,11 @@
                     <p><i class="fas fa-envelope"></i> info@tech-aggregator.ru</p>
                 </div>
                 <div class="footer-section">
-                    <h4>Документы</h4>
-                    <a href="#">Пользовательское соглашение</a>
-                    <a href="#">Политика конфиденциальности</a>
+                    <h4>Навигация</h4>
+                    <!-- ДОБАВЛЕНО: Ссылки на страницы -->
+                    <a href="pages/auth/login.html">Вход в систему</a>
+                    <a href="pages/auth/register.html">Регистрация</a>
+                    <a href="pages/client/dashboard.html">Личный кабинет</a>
                 </div>
             </div>
             <div class="footer-bottom">
@@ -178,21 +247,22 @@
             sessionStorage.setItem('search_location', location);
             
             // Проверяем авторизацию
-            const user = getCurrentUser();
-            if (user) {
-                // Если авторизован - перенаправляем на создание заказа
-                window.location.href = '/pages/orders/create.html';
-            } else {
-                // Если не авторизован - на регистрацию
-                window.location.href = '/pages/auth/register.html?action=quick_order';
-            }
+            supabase.auth.getSession().then(({ data }) => {
+                if (data.session) {
+                    // Если авторизован - перенаправляем на создание заказа
+                    window.location.href = 'pages/orders/create.html';
+                } else {
+                    // Если не авторизован - на регистрацию
+                    window.location.href = 'pages/auth/register.html?action=quick_order';
+                }
+            });
         }
         
         // Обработчики для кнопок регистрации
         document.querySelectorAll('.role-card .btn').forEach(btn => {
             btn.addEventListener('click', function(e) {
                 e.preventDefault();
-                const url = new URL(this.href);
+                const url = new URL(this.href, window.location.origin);
                 const role = url.searchParams.get('role');
                 if (role) {
                     sessionStorage.setItem('preferred_role', role);
@@ -201,10 +271,138 @@
             });
         });
         
-        // Инициализация при загрузке
+        // Dropdown меню
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Главная страница загружена');
+            const dropdowns = document.querySelectorAll('.dropdown');
+            dropdowns.forEach(dropdown => {
+                const toggle = dropdown.querySelector('.dropdown-toggle');
+                const menu = dropdown.querySelector('.dropdown-menu');
+                
+                toggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+                });
+                
+                // Закрытие при клике вне меню
+                document.addEventListener('click', function() {
+                    menu.style.display = 'none';
+                });
+            });
+            
+            // Проверка авторизации при загрузке
+            supabase.auth.getSession().then(({ data }) => {
+                const loggedOut = document.querySelector('.logged-out');
+                const loggedIn = document.querySelector('.logged-in');
+                const userEmail = document.querySelector('.user-email');
+                
+                if (data.session) {
+                    loggedOut.style.display = 'none';
+                    loggedIn.style.display = 'flex';
+                    if (userEmail) {
+                        userEmail.textContent = data.session.user.email || 'user@example.com';
+                    }
+                } else {
+                    loggedOut.style.display = 'flex';
+                    loggedIn.style.display = 'none';
+                }
+            });
         });
+        
+        // Функция выхода
+        async function logout() {
+            const { error } = await supabase.auth.signOut();
+            if (!error) {
+                window.location.reload();
+            }
+        }
     </script>
+    
+    <!-- ДОБАВЛЕНО: Стили для новых элементов -->
+    <style>
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: white;
+            min-width: 200px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 10px 0;
+            z-index: 1000;
+        }
+        
+        .dropdown-item {
+            display: block;
+            padding: 10px 20px;
+            color: #333;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        
+        .dropdown-item:hover {
+            background: #f5f5f5;
+        }
+        
+        .dropdown-divider {
+            height: 1px;
+            background: #eee;
+            margin: 8px 0;
+        }
+        
+        .pages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .page-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .page-card h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .page-links {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-links {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            
+            .dropdown-menu {
+                position: static;
+                box-shadow: none;
+            }
+        }
+    </style>
 </body>
 </html>
