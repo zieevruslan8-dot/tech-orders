@@ -6,6 +6,9 @@
     <title>ТехноАггрегатор - Заказ спецтехники</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
 </head>
 <body>
     <!-- Навигация -->
@@ -15,12 +18,30 @@
                 <i class="fas fa-truck-monster"></i>
                 <span>ТехноАггрегатор</span>
             </a>
-            <div class="nav-links">
+            
+            <!-- Для неавторизованных пользователей -->
+            <div class="nav-links logged-out">
                 <a href="#how-it-works">Как работает</a>
                 <a href="#technics">Техника</a>
                 <a href="#pricing">Тарифы</a>
                 <a href="pages/auth/login.html" class="btn btn-outline">Войти</a>
                 <a href="pages/auth/register.html" class="btn btn-primary">Регистрация</a>
+            </div>
+            
+            <!-- Для авторизованных пользователей -->
+            <div class="nav-links logged-in" style="display: none;">
+                <a href="pages/client/dashboard.html" class="btn btn-outline">
+                    <i class="fas fa-tachometer-alt"></i> Личный кабинет
+                </a>
+                <a href="pages/orders/create.html" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Новый заказ
+                </a>
+                <div class="user-menu">
+                    <span class="user-email">user@example.com</span>
+                    <button onclick="logout()" class="btn btn-link">
+                        <i class="fas fa-sign-out-alt"></i> Выйти
+                    </button>
+                </div>
             </div>
         </div>
     </nav>
@@ -52,7 +73,7 @@
                     <label for="date"><i class="fas fa-calendar-alt"></i> Дата работы</label>
                     <input type="date" id="date">
                 </div>
-                <button class="btn btn-primary btn-large">
+                <button class="btn btn-primary btn-large" onclick="handleQuickSearch()">
                     <i class="fas fa-search"></i> Найти технику
                 </button>
             </div>
@@ -141,5 +162,49 @@
     </footer>
 
     <script src="app.js"></script>
+    <script>
+        // Функция быстрого поиска
+        function handleQuickSearch() {
+            const techType = document.getElementById('tech-type').value;
+            const location = document.getElementById('location').value;
+            
+            if (!techType || !location) {
+                alert('Пожалуйста, заполните тип техники и местоположение');
+                return;
+            }
+            
+            // Сохраняем параметры поиска
+            sessionStorage.setItem('search_tech_type', techType);
+            sessionStorage.setItem('search_location', location);
+            
+            // Проверяем авторизацию
+            const user = getCurrentUser();
+            if (user) {
+                // Если авторизован - перенаправляем на создание заказа
+                window.location.href = '/pages/orders/create.html';
+            } else {
+                // Если не авторизован - на регистрацию
+                window.location.href = '/pages/auth/register.html?action=quick_order';
+            }
+        }
+        
+        // Обработчики для кнопок регистрации
+        document.querySelectorAll('.role-card .btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const url = new URL(this.href);
+                const role = url.searchParams.get('role');
+                if (role) {
+                    sessionStorage.setItem('preferred_role', role);
+                }
+                window.location.href = this.href;
+            });
+        });
+        
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Главная страница загружена');
+        });
+    </script>
 </body>
-  </html>
+</html>
