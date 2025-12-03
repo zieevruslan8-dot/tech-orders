@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кабинет автопарка | ТехноАггрегатор</title>
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .fleet-container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-box {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #3498db;
+            margin: 10px 0;
+        }
+        .vehicles-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .vehicle-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .vehicle-info h4 {
+            margin: 0 0 5px 0;
+        }
+        .vehicle-status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        .status-free { background: #e8f5e9; color: #388e3c; }
+        .status-busy { background: #fff3e0; color: #f57c00; }
+        .status-repair { background: #ffebee; color: #d32f2f; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="../../index.html" class="logo">
+                <i class="fas fa-truck-monster"></i>
+                <span>ТехноАггрегатор</span>
+            </a>
+            <div class="nav-links">
+                <a href="../../index.html">Главная</a>
+                <a href="dashboard.html" class="active">Мой автопарк</a>
+                <a href="../auth/login.html" onclick="logout()">Выйти</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="fleet-container">
+        <div class="dashboard-header">
+            <h1>Управление автопарком</h1>
+            <button onclick="showAddVehicleModal()" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Добавить технику
+            </button>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-box">
+                <h3>Всего техники</h3>
+                <div class="stat-value" id="totalVehicles">0</div>
+                <p>единиц в парке</p>
+            </div>
+            <div class="stat-box">
+                <h3>Свободно</h3>
+                <div class="stat-value" id="freeVehicles">0</div>
+                <p>готовы к работе</p>
+            </div>
+            <div class="stat-box">
+                <h3>В работе</h3>
+                <div class="stat-value" id="busyVehicles">0</div>
+                <p>выполняют заказы</p>
+            </div>
+            <div class="stat-box">
+                <h3>Доход</h3>
+                <div class="stat-value" id="totalRevenue">0₽</div>
+                <p>за текущий месяц</p>
+            </div>
+        </div>
+        
+        <div class="vehicles-section">
+            <h3>Моя техника</h3>
+            <div id="vehiclesList">
+                <p>Загрузка списка техники...</p>
+            </div>
+        </div>
+        
+        <div class="vehicles-section">
+            <h3>Активные заказы</h3>
+            <div id="activeOrders">
+                <p>Нет активных заказов</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно добавления техники -->
+    <div id="addVehicleModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="background: white; max-width: 500px; margin: 100px auto; padding: 30px; border-radius: 10px;">
+            <h2>Добавить технику</h2>
+            <form id="addVehicleForm">
+                <div style="margin-bottom: 15px;">
+                    <label>Название техники:</label>
+                    <input type="text" id="vehicleName" required style="width: 100%; padding: 10px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label>Тип техники:</label>
+                    <select id="vehicleType" style="width: 100%; padding: 10px;">
+                        <option value="excavator">Экскаватор</option>
+                        <option value="truck">Грузовик</option>
+                        <option value="crane">Кран</option>
+                        <option value="bulldozer">Бульдозер</option>
+                        <option value="loader">Погрузчик</option>
+                        <option value="concrete_mixer">Бетономешалка</option>
+                        <option value="tractor">Трактор</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label>Гос. номер:</label>
+                    <input type="text" id="licensePlate" style="width: 100%; padding: 10px;" placeholder="А123БВ777">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label>Статус:</label>
+                    <select id="vehicleStatus" style="width: 100%; padding: 10px;">
+                        <option value="free">Свободна</option>
+                        <option value="busy">В работе</option>
+                        <option value="repair">На ремонте</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" class="btn btn-primary">Добавить</button>
+                    <button type="button" onclick="hideAddVehicleModal()" class="btn btn-outline">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../supabase-config.js"></script>
+    <script>
+        let fleetId = null;
+        
+        function showAddVehicleModal() {
+            document.getElementById('addVehicleModal').style.display = 'block';
+        }
+        
+        function hideAddVehicleModal() {
+            document.getElementById('addVehicleModal').style.display = 'none';
+            document.getElementById('addVehicleForm').reset();
+        }
+        
+        async function loadFleetData() {
+            // Загружаем технику автопарка
+            const { data: vehicles, error: vehiclesError } = await supabase
+                .from('vehicles')
+                .select('*')
+                .eq('fleet_id', fleetId)
+                .order('created_at', { ascending: false });
+            
+            // Загружаем заказы автопарка
+            const { data: orders, error: ordersError } = await supabase
+                .from('orders')
+                .select('*')
+                .eq('fleet_id', fleetId)
+                .neq('status', 'completed')
+                .order('created_at', { ascending: false });
+            
+            // Обновляем статистику
+            if (vehicles && !vehiclesError) {
+                document.getElementById('totalVehicles').textContent = vehicles.length;
+                document.getElementById('freeVehicles').textContent = vehicles.filter(v => v.status === 'free').length;
+                document.getElementById('busyVehicles').textContent = vehicles.filter(v => v.status === 'busy').length;
+                
+                // Обновляем список техники
+                const vehiclesList = document.getElementById('vehiclesList');
+                if (vehicles.length === 0) {
+                    vehiclesList.innerHTML = '<p>В вашем автопарке пока нет техники</p>';
+                } else {
+                    vehiclesList.innerHTML = vehicles.map(vehicle => `
+                        <div class="vehicle-card">
+                            <div class="vehicle-info">
+                                <h4>${vehicle.name}</h4>
+                                <p>Тип: ${getVehicleTypeName(vehicle.type)} | Гос. номер: ${vehicle.license_plate || 'не указан'}</p>
+                            </div>
+                            <div>
+                                <span class="vehicle-status status-${vehicle.status}">${getVehicleStatusName(vehicle.status)}</span>
+                                <button onclick="editVehicle('${vehicle.id}')" class="btn btn-sm btn-outline" style="margin-left: 10px;">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+            
+            // Обновляем список заказов
+            if (orders && !ordersError) {
+                const ordersList = document.getElementById('activeOrders');
+                if (orders.length === 0) {
+                    ordersList.innerHTML = '<p>Нет активных заказов</p>';
+                } else {
+                    ordersList.innerHTML = orders.map(order => `
+                        <div class="vehicle-card">
+                            <div>
+                                <h4>${order.title || 'Заказ без названия'}</h4>
+                                <p>Клиент: ${order.client_email || 'Не указан'} | Техника: ${getVehicleTypeName(order.vehicle_type)}</p>
+                                <p>Статус: ${getStatusName(order.status)} | Бюджет: ${order.budget ? order.budget + '₽' : 'Договорная'}</p>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+            
+            // Рассчитываем доход (примерно)
+            const { data: completedOrders } = await supabase
+                .from('orders')
+                .select('budget')
+                .eq('fleet_id', fleetId)
+                .eq('status', 'completed')
+                .gte('completed_at', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString());
+            
+            if (completedOrders) {
+                const total = completedOrders.reduce((sum, order) => sum + (parseInt(order.budget) || 0), 0);
+                document.getElementById('totalRevenue').textContent = total + '₽';
+            }
+        }
+        
+        document.getElementById('addVehicleForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('vehicleName').value;
+            const type = document.getElementById('vehicleType').value;
+            const licensePlate = document.getElementById('licensePlate').value;
+            const status = document.getElementById('vehicleStatus').value;
+            
+            const { error } = await supabase
+                .from('vehicles')
+                .insert({
+                    name: name,
+                    type: type,
+                    license_plate: licensePlate,
+                    status: status,
+                    fleet_id: fleetId,
+                    created_at: new Date()
+                });
+            
+            if (error) {
+                alert('Ошибка: ' + error.message);
+            } else {
+                alert('Техника успешно добавлена!');
+                hideAddVehicleModal();
+                loadFleetData();
+            }
+        });
+        
+        function getVehicleTypeName(type) {
+            const types = {
+                'excavator': 'Экскаватор',
+                'truck': 'Грузовик',
+                'crane': 'Кран',
+                'bulldozer': 'Бульдозер',
+                'loader': 'Погрузчик',
+                'concrete_mixer': 'Бетономешалка',
+                'tractor': 'Трактор'
+            };
+            return types[type] || type;
+        }
+        
+        function getVehicleStatusName(status) {
+            const statuses = {
+                'free': 'Свободна',
+                'busy': 'В работе',
+                'repair': 'На ремонте'
+            };
+            return statuses[status] || status;
+        }
+        
+        function getStatusName(status) {
+            const statuses = {
+                'open': 'Открыт',
+                'taken': 'Принят',
+                'in_progress': 'В работе',
+                'completed': 'Завершён'
+            };
+            return statuses[status] || status;
+        }
+        
+        function editVehicle(vehicleId) {
+            alert('Редактирование техники с ID: ' + vehicleId);
+            // Здесь можно добавить функционал редактирования
+        }
+        
+        async function logout() {
+            await supabase.auth.signOut();
+            window.location.href = "../auth/login.html";
+        }
+        
+        // Инициализация
+        supabase.auth.getSession().then(async ({ data }) => {
+            if (!data.session) {
+                window.location.href = "../auth/login.html";
+            } else {
+                // Получаем или создаем запись автопарка для пользователя
+                const userId = data.session.user.id;
+                
+                // Проверяем, есть ли уже автопарк у пользователя
+                const { data: existingFleet } = await supabase
+                    .from('fleets')
+                    .select('id')
+                    .eq('owner_id', userId)
+                    .single();
+                
+                if (existingFleet) {
+                    fleetId = existingFleet.id;
+                } else {
+                    // Создаем новый автопарк
+                    const { data: newFleet, error } = await supabase
+                        .from('fleets')
+                        .insert({
+                            name: 'Мой автопарк',
+                            owner_id: userId,
+                            created_at: new Date()
+                        })
+                        .select()
+                        .single();
+                    
+                    if (!error) {
+                        fleetId = newFleet.id;
+                    }
+                }
+                
+                if (fleetId) {
+                    loadFleetData();
+                }
+            }
+        });
+        
+        // Закрытие модального окна при клике вне его
+        document.getElementById('addVehicleModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideAddVehicleModal();
+            }
+        });
+    </script>
+</body>
+</html>
