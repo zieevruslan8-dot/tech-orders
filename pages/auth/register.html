@@ -1,137 +1,125 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Регистрация | ТехноАггрегатор</title>
-    <link rel="stylesheet" href="../../style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .register-container {
-            max-width: 500px;
-            margin: 50px auto;
-            padding: 40px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .role-selection {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .role-option {
-            flex: 1;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-        }
-        .role-option.selected {
-            border-color: #3498db;
-            background: #ebf5fb;
-        }
-    </style>
-</head>
-<body>
-    <nav class="navbar">
-        <div class="container">
-            <a href="../../index.html" class="logo">
-                <i class="fas fa-truck-monster"></i>
-                <span>ТехноАггрегатор</span>
-            </a>
-            <div class="nav-links">
-                <a href="../../index.html">Главная</a>
-                <a href="login.html">Вход</a>
-            </div>
-        </div>
-    </nav>
+// Функция перенаправления по роли
+function redirectByRole(role) {
+    switch(role) {
+        case 'client':
+            window.location.href = "../client/dashboard.html";
+            break;
+        case 'driver':
+            window.location.href = "../driver/dashboard.html";
+            break;
+        case 'fleet':
+            window.location.href = "../fleet/dashboard.html";
+            break;
+        default:
+            window.location.href = "../client/dashboard.html";
+    }
+}
 
-    <div class="register-container">
-        <h1 style="text-align: center;">Регистрация</h1>
-        
-        <form id="registerForm">
-            <div class="role-selection">
-                <div class="role-option selected" onclick="selectRole('client')">
-                    <strong>👤 Клиент</strong><br>
-                    <small>Хочу заказывать технику</small>
-                </div>
-                <div class="role-option" onclick="selectRole('driver')">
-                    <strong>🚚 Водитель</strong><br>
-                    <small>Ищу заказы на перевозки</small>
-                </div>
-                <div class="role-option" onclick="selectRole('fleet')">
-                    <strong>🏢 Автопарк</strong><br>
-                    <small>Предоставляю технику</small>
-                </div>
-            </div>
-            
-            <input type="hidden" id="role" value="client">
-            
-            <div class="form-group">
-                <label>Имя:</label>
-                <input type="text" id="firstName" required style="width: 100%; padding: 10px;">
-            </div>
-            
-            <div class="form-group">
-                <label>Email:</label>
-                <input type="email" id="email" required style="width: 100%; padding: 10px;">
-            </div>
-            
-            <div class="form-group">
-                <label>Пароль:</label>
-                <input type="password" id="password" required style="width: 100%; padding: 10px;">
-            </div>
-            
-            <button type="submit" class="btn btn-primary" style="width: 100%;">Зарегистрироваться</button>
-        </form>
-        
-        <p style="text-align: center; margin-top: 20px;">
-            Уже есть аккаунт? <a href="login.html">Войдите</a>
-        </p>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../../supabase-config.js"></script>
-    <script>
-        function selectRole(role) {
-            document.querySelectorAll('.role-option').forEach(opt => {
-                opt.classList.remove('selected');
-            });
-            event.target.closest('.role-option').classList.add('selected');
-            document.getElementById('role').value = role;
-        }
-        
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const firstName = document.getElementById('firstName').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const role = document.getElementById('role').value;
-            
-            const { data, error } = await supabase.auth.signUp({
-                email: email,
-                password: password,
-                options: {
-                    data: {
-                        first_name: firstName,
-                        role: role
-                    }
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const firstName = document.getElementById('firstName').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const role = document.getElementById('role').value;
+    
+    try {
+        // 1. РЕГИСТРАЦИЯ (теперь без подтверждения email)
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+            email: email,
+            password: password,
+            options: {
+                data: {
+                    first_name: firstName,
+                    role: role
                 }
-            });
-            
-            if (error) {
-                alert('Ошибка: ' + error.message);
-            } else {
-                alert('Регистрация успешна! Проверьте email для подтверждения.');
-                window.location.href = "login.html";
+                // НЕТ emailConfirm: false - просто не включаем
             }
         });
-    </script>
-</body>
-</html>
+        
+        if (authError) {
+            // Если пользователь уже существует
+            if (authError.message.includes('already registered') || 
+                authError.message.includes('User already registered')) {
+                
+                // Пробуем войти с этими данными
+                const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+                
+                if (signInError) {
+                    alert('Пользователь уже существует, но пароль неверный.');
+                    return;
+                }
+                
+                // Сохраняем данные
+                localStorage.setItem('user_role', role);
+                localStorage.setItem('user_email', email);
+                localStorage.setItem('user_name', firstName);
+                
+                // Перенаправляем
+                redirectByRole(role);
+                return;
+            }
+            
+            alert('Ошибка регистрации: ' + authError.message);
+            return;
+        }
+        
+        // 2. СРАЗУ ВХОДИМ ПОСЛЕ РЕГИСТРАЦИИ
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+        
+        if (signInError) {
+            // Если всё ещё ошибка (маловероятно, но на всякий случай)
+            alert('Регистрация успешна, но вход не удался: ' + signInError.message + '\n\nПопробуйте войти вручную.');
+            window.location.href = "login.html";
+            return;
+        }
+        
+        // 3. СОЗДАЁМ ПРОФИЛЬ
+        if (signInData.user) {
+            const { error: profileError } = await supabase
+                .from('profiles')
+                .upsert({
+                    id: signInData.user.id,
+                    email: email,
+                    first_name: firstName,
+                    role: role,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                });
+            
+            if (profileError) {
+                console.warn('Предупреждение (профиль):', profileError);
+                // Не прерываем процесс, это не критично
+            }
+        }
+        
+        // 4. СОХРАНЯЕМ ДАННЫЕ И ПЕРЕНАПРАВЛЯЕМ
+        localStorage.setItem('user_role', role);
+        localStorage.setItem('user_email', email);
+        localStorage.setItem('user_name', firstName);
+        
+        // Показываем сообщение и перенаправляем
+        alert(`✅ Регистрация успешна!\nДобро пожаловать, ${firstName}!`);
+        redirectByRole(role);
+        
+    } catch (error) {
+        alert('Ошибка: ' + error.message);
+        console.error('Полная ошибка:', error);
+    }
+});
+
+// Проверяем, если уже авторизован
+document.addEventListener('DOMContentLoaded', async () => {
+    const { data } = await supabase.auth.getSession();
+    if (data.session) {
+        // Если уже вошёл, перенаправляем
+        const savedRole = localStorage.getItem('user_role') || 'client';
+        redirectByRole(savedRole);
+    }
+});
