@@ -119,6 +119,18 @@
             margin-bottom: 10px;
             color: #3498db;
         }
+        /* ДОБАВЛЕНО: Стили для индикатора загрузки */
+        .fa-spinner {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -294,6 +306,7 @@
     <script>
         let currentStep = 1;
         let selectedVehicleType = '';
+        let isSubmitting = false; // ДОБАВЛЕНО: Защита от повторной отправки
         
         function selectVehicleType(type) {
             selectedVehicleType = type;
@@ -386,33 +399,53 @@
         document.getElementById('createOrderForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Собираем данные
-            const orderData = {
-                title: document.getElementById('orderTitle').value,
-                description: document.getElementById('orderDescription').value,
-                vehicle_type: selectedVehicleType,
-                location: document.getElementById('location').value,
-                deadline: document.getElementById('deadline').value || null,
-                budget: document.getElementById('budget').value || null,
-                duration: document.getElementById('duration').value,
-                contact_phone: document.getElementById('contactPhone').value,
-                additional_info: document.getElementById('additionalInfo').value,
-                status: 'open',
-                created_at: new Date().toISOString()
-            };
+            // ДОБАВЛЕНО: Защита от повторной отправки
+            if (isSubmitting) {
+                console.log('Форма уже отправляется...');
+                return;
+            }
+            
+            // ДОБАВЛЕНО: Блокируем кнопку
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            const originalText = submitButton.innerHTML;
+            isSubmitting = true;
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Создаём заказ...';
             
             try {
+                // Собираем данные
+                const orderData = {
+                    title: document.getElementById('orderTitle').value,
+                    description: document.getElementById('orderDescription').value,
+                    vehicle_type: selectedVehicleType,
+                    location: document.getElementById('location').value,
+                    deadline: document.getElementById('deadline').value || null,
+                    budget: document.getElementById('budget').value || null,
+                    duration: document.getElementById('duration').value,
+                    contact_phone: document.getElementById('contactPhone').value,
+                    additional_info: document.getElementById('additionalInfo').value,
+                    status: 'open',
+                    created_at: new Date().toISOString()
+                };
+                
                 // Получаем текущего пользователя
                 const { data: userData } = await supabase.auth.getSession();
                 if (!userData.session) {
                     alert('Пожалуйста, войдите в систему');
                     window.location.href = "../auth/login.html";
+                    
+                    // ДОБАВЛЕНО: Разблокируем кнопку
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalText;
+                    isSubmitting = false;
                     return;
                 }
                 
-                // Добавляем ID пользователя к данным заказа
-                orderData.user_id = userData.session.user.id;
+                // ИСПРАВЛЕНО: user_id → client_id
+                orderData.client_id = userData.session.user.id; // ← ИСПРАВЛЕНО ЗДЕСЬ
                 orderData.client_email = userData.session.user.email;
+                
+                console.log('Отправляемые данные заказа:', orderData); // ДОБАВЛЕНО: Логирование
                 
                 // Сохраняем заказ в базу данных
                 const { data, error } = await supabase
@@ -421,15 +454,37 @@
                     .select()
                     .single();
                 
-                if (error) throw error;
+                if (error) {
+                    console.error('Ошибка Supabase:', error); // ДОБАВЛЕНО: Детальный лог ошибки
+                    throw error;
+                }
                 
                 // Успех!
-                alert('Заказ успешно создан! Водители увидят его в списке доступных заказов.');
-                window.location.href = "../client/dashboard.html";
+                submitButton.innerHTML = '<i class="fas fa-check"></i> Заказ создан!';
+                submitButton.style.backgroundColor = '#2ecc71';
+                
+                setTimeout(() => {
+                    alert('Заказ успешно создан! Водители увидят его в списке доступных заказов.');
+                    window.location.href = "../client/dashboard.html";
+                }, 1000);
                 
             } catch (error) {
-                alert('Ошибка при создании заказа: ' + error.message);
                 console.error('Order creation error:', error);
+                
+                // ДОБАВЛЕНО: Разблокируем кнопку при ошибке
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalText;
+                submitButton.style.backgroundColor = '';
+                isSubmitting = false;
+                
+                // Улучшенное сообщение об ошибке
+                let errorMessage = 'Ошибка при создании заказа: ' + error.message;
+                
+                if (error.message.includes('client_id') || error.message.includes('column')) {
+                    errorMessage += '\n\nВозможно, в таблице orders нет колонки client_id.\nПроверьте структуру таблицы в Supabase.';
+                }
+                
+                alert(errorMessage);
             }
         });
         
@@ -449,6 +504,13 @@
             // Устанавливаем минимальную дату как сегодня
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('deadline').min = today;
+            
+            // ДОБАВЛЕНО: Автовыбор первого типа техники
+            const firstVehicle = document.querySelector('.vehicle-option');
+            if (firstVehicle) {
+                const type = firstVehicle.dataset.type;
+                selectVehicleType(type);
+            }
         });
     </script>
 </body>
