@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="../../style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Все ваши стили остаются без изменений */
         .role-selection {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -227,46 +226,28 @@
             console.log('Выбрана роль:', role);
         }
         
-        // Функция перенаправления по роли (ИЗМЕНЕНА - ДОБАВЛЕНА ЗАДЕРЖКА)
+        // Функция перенаправления по роли (ТОЛЬКО С ЗАДЕРЖКОЙ)
         function redirectByRole(role) {
-            console.log('⏳ Ожидание создания профиля (4 секунды)...');
+            console.log('⏳ Ожидание 4 секунды перед редиректом для роли:', role);
             
-            // ВАЖНО: Добавляем задержку 4 секунды
+            // ВАЖНОЕ ИЗМЕНЕНИЕ: Добавляем задержку 4 секунды
             setTimeout(() => {
-                console.log('✅ Переход в кабинет для роли:', role);
+                console.log('✅ Выполняем редирект для:', role);
                 
-                // Показываем пользователю сообщение о задержке
-                const messageDiv = document.createElement('div');
-                messageDiv.style.cssText = 'text-align: center; padding: 20px; background: #e8f5e9; border-radius: 10px; margin-top: 20px;';
-                messageDiv.innerHTML = `
-                    <h3 style="color: #2ecc71;">✅ Регистрация успешна!</h3>
-                    <p>Создаем ваш профиль...</p>
-                    <p>Автоматический переход через 3 секунды</p>
-                `;
-                
-                const formSection = document.querySelector('.form-section');
-                if (formSection) {
-                    formSection.parentNode.insertBefore(messageDiv, formSection.nextSibling);
+                switch(role) {
+                    case 'client':
+                        window.location.href = "../client/dashboard.html";
+                        break;
+                    case 'driver':
+                        window.location.href = "../driver/dashboard.html";
+                        break;
+                    case 'fleet':
+                        window.location.href = "../fleet/dashboard.html";
+                        break;
+                    default:
+                        window.location.href = "../client/dashboard.html";
                 }
-                
-                // Еще одна небольшая задержка для плавности
-                setTimeout(() => {
-                    switch(role) {
-                        case 'client':
-                            window.location.href = "../client/dashboard.html";
-                            break;
-                        case 'driver':
-                            window.location.href = "../driver/dashboard.html";
-                            break;
-                        case 'fleet':
-                            window.location.href = "../fleet/dashboard.html";
-                            break;
-                        default:
-                            window.location.href = "../client/dashboard.html";
-                    }
-                }, 3000); // Дополнительные 3 секунды для сообщения
-                
-            }, 4000); // Главная задержка 4 секунды
+            }, 4000); // Задержка 4000ms = 4 секунды
         }
         
         // Обработка формы регистрации
