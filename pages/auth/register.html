@@ -6,6 +6,117 @@
     <title>Регистрация | ТехноАггрегатор</title>
     <link rel="stylesheet" href="../../style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .role-selection {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .role-option {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .role-option:hover {
+            border-color: #3498db;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .role-option.selected {
+            border-color: #3498db;
+            background: #ebf5fb;
+        }
+        
+        .role-option i {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .role-option.client i { color: #3498db; }
+        .role-option.driver i { color: #2ecc71; }
+        .role-option.fleet i { color: #9b59b6; }
+        
+        .role-option h4 {
+            margin: 10px 0 5px 0;
+            color: #2c3e50;
+        }
+        
+        .role-option p {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin: 0;
+        }
+        
+        .form-section {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .register-btn {
+            width: 100%;
+            padding: 15px;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .register-btn:hover {
+            background: #27ae60;
+        }
+        
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+        
+        .login-link a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -21,44 +132,100 @@
         </div>
     </nav>
 
-    <div class="container" style="max-width: 400px; margin: 50px auto;">
-        <h1 style="text-align: center;">Регистрация</h1>
-        <div class="card">
-            <form id="registerForm">
-                <div style="margin-bottom: 15px;">
-                    <label>Имя:</label>
-                    <input type="text" id="firstName" required style="width: 100%; padding: 10px;">
-                </div>
-                <div style="margin-bottom: 15px;">
-                    <label>Email:</label>
-                    <input type="email" id="email" required style="width: 100%; padding: 10px;">
-                </div>
-                <div style="margin-bottom: 15px;">
-                    <label>Пароль:</label>
-                    <input type="password" id="password" required style="width: 100%; padding: 10px;">
-                </div>
-                <div style="margin-bottom: 20px;">
-                    <label>Выберите роль:</label>
-                    <select id="role" style="width: 100%; padding: 10px;">
-                        <option value="client">Клиент</option>
-                        <option value="driver">Водитель</option>
-                        <option value="fleet">Автопарк</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">Зарегистрироваться</button>
-            </form>
-            <p style="margin-top: 20px; text-align: center;">
-                Уже есть аккаунт? <a href="login.html">Войдите</a>
+    <div class="container" style="max-width: 800px; margin: 30px auto;">
+        <h1 style="text-align: center; color: #2c3e50;">Создание аккаунта</h1>
+        <p style="text-align: center; color: #7f8c8d; margin-bottom: 30px;">
+            Выберите тип аккаунта и заполните данные
+        </p>
+        
+        <!-- Выбор роли -->
+        <div class="form-section">
+            <h3 style="margin-bottom: 20px; color: #2c3e50;">Кто вы?</h3>
+            <p style="color: #666; margin-bottom: 20px;">
+                Выберите тип аккаунта, соответствующий вашим потребностям
             </p>
+            
+            <div class="role-selection">
+                <!-- Клиент -->
+                <div class="role-option client selected" onclick="selectRole('client')">
+                    <i class="fas fa-hard-hat"></i>
+                    <h4>Клиент</h4>
+                    <p>Хочу заказывать технику</p>
+                </div>
+                
+                <!-- Водитель -->
+                <div class="role-option driver" onclick="selectRole('driver')">
+                    <i class="fas fa-truck"></i>
+                    <h4>Водитель</h4>
+                    <p>Ищу заказы на перевозки</p>
+                </div>
+                
+                <!-- Автопарк -->
+                <div class="role-option fleet" onclick="selectRole('fleet')">
+                    <i class="fas fa-warehouse"></i>
+                    <h4>Автопарк</h4>
+                    <p>Предоставляю технику</p>
+                </div>
+            </div>
+            
+            <!-- Скрытое поле для роли -->
+            <input type="hidden" id="role" value="client">
+        </div>
+        
+        <!-- Форма регистрации -->
+        <div class="form-section">
+            <h3 style="margin-bottom: 20px; color: #2c3e50;">Ваши данные</h3>
+            
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="firstName">Имя</label>
+                    <input type="text" id="firstName" required placeholder="Как к вам обращаться?">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required placeholder="ваш@email.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Пароль</label>
+                    <input type="password" id="password" required placeholder="Не менее 6 символов" minlength="6">
+                </div>
+                
+                <button type="submit" class="register-btn">
+                    <i class="fas fa-user-plus"></i> Создать аккаунт
+                </button>
+            </form>
+            
+            <div class="login-link">
+                <p>Уже есть аккаунт? <a href="login.html">Войдите</a></p>
+            </div>
         </div>
     </div>
 
-    <!-- ПОДКЛЮЧЕНИЕ SCRIPTS -->
+    <!-- Подключение JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../../supabase-config.js"></script>
     
-    <!-- СКРИПТ РЕГИСТРАЦИИ -->
+    <!-- Скрипт регистрации -->
     <script>
+        // Выбор роли
+        function selectRole(role) {
+            // Снимаем выделение со всех карточек
+            document.querySelectorAll('.role-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Выделяем выбранную карточку
+            const selectedOption = document.querySelector(`.role-option.${role}`);
+            selectedOption.classList.add('selected');
+            
+            // Устанавливаем значение в скрытое поле
+            document.getElementById('role').value = role;
+            
+            console.log('Выбрана роль:', role);
+        }
+        
         // Функция перенаправления по роли
         function redirectByRole(role) {
             switch(role) {
@@ -75,7 +242,8 @@
                     window.location.href = "../client/dashboard.html";
             }
         }
-
+        
+        // Обработка формы регистрации
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -84,8 +252,25 @@
             const password = document.getElementById('password').value;
             const role = document.getElementById('role').value;
             
+            // Валидация
+            if (!firstName || !email || !password) {
+                alert('Пожалуйста, заполните все поля');
+                return;
+            }
+            
+            if (password.length < 6) {
+                alert('Пароль должен содержать не менее 6 символов');
+                return;
+            }
+            
             try {
-                // 1. РЕГИСТРАЦИЯ (теперь без подтверждения email)
+                // Показываем загрузку
+                const submitBtn = document.querySelector('.register-btn');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Регистрируем...';
+                submitBtn.disabled = true;
+                
+                // 1. РЕГИСТРАЦИЯ
                 const { data: authData, error: authError } = await supabase.auth.signUp({
                     email: email,
                     password: password,
@@ -110,6 +295,8 @@
                         
                         if (signInError) {
                             alert('Пользователь уже существует, но пароль неверный.');
+                            submitBtn.innerHTML = originalText;
+                            submitBtn.disabled = false;
                             return;
                         }
                         
@@ -124,6 +311,8 @@
                     }
                     
                     alert('Ошибка регистрации: ' + authError.message);
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
                     return;
                 }
                 
@@ -162,22 +351,40 @@
                 localStorage.setItem('user_email', email);
                 localStorage.setItem('user_name', firstName);
                 
-                alert(`✅ Регистрация успешна!\nДобро пожаловать, ${firstName}!`);
+                // Красивое сообщение
+                const roleNames = {
+                    'client': 'клиента',
+                    'driver': 'водителя',
+                    'fleet': 'автопарка'
+                };
+                
+                alert(`✅ Регистрация успешна!\nДобро пожаловать, ${firstName}!\nВы зарегистрированы как ${roleNames[role]}.`);
                 redirectByRole(role);
                 
             } catch (error) {
                 alert('Ошибка: ' + error.message);
                 console.error('Полная ошибка:', error);
+                
+                // Восстанавливаем кнопку
+                const submitBtn = document.querySelector('.register-btn');
+                submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Создать аккаунт';
+                submitBtn.disabled = false;
             }
         });
-
+        
         // Проверяем, если уже авторизован
         document.addEventListener('DOMContentLoaded', async () => {
             const { data } = await supabase.auth.getSession();
             if (data.session) {
-                // Если уже вошёл, перенаправляем по сохранённой роли
                 const savedRole = localStorage.getItem('user_role') || 'client';
                 redirectByRole(savedRole);
+            }
+            
+            // Автоматически выбираем роль из URL параметра
+            const urlParams = new URLSearchParams(window.location.search);
+            const roleFromUrl = urlParams.get('role');
+            if (roleFromUrl && ['client', 'driver', 'fleet'].includes(roleFromUrl)) {
+                selectRole(roleFromUrl);
             }
         });
     </script>
