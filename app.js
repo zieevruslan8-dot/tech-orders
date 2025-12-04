@@ -43,23 +43,30 @@ async function ensureUserProfile(user) {
         const role = user.user_metadata?.role || localStorage.getItem('user_role') || 'client';
         const firstName = user.user_metadata?.first_name || localStorage.getItem('user_name') || user.email?.split('@')[0] || 'Пользователь';
         
-        // Обновляем профиль в базе
-        const { error: profileError } = await supabaseClient
-            .from('profiles')
-            .upsert({
-                id: user.id,
-                email: user.email,
-                first_name: firstName,
-                role: role,
-                updated_at: new Date().toISOString()
-            }, {
-                onConflict: 'id'
-            });
-        
-        if (profileError) {
-            console.warn('⚠️ Ошибка обновления профиля:', profileError);
-        } else {
-            console.log('✅ Профиль обновлён:', { email: user.email, role });
+        // Проверяем существование таблицы profiles
+        try {
+            // Обновляем профиль в базе
+            const { error: profileError } = await supabaseClient
+                .from('profiles')
+                .upsert({
+                    id: user.id,
+                    email: user.email,
+                    first_name: firstName,
+                    role: role,
+                    updated_at: new Date().toISOString()
+                }, {
+                    onConflict: 'id'
+                });
+            
+            if (profileError && profileError.code === '42P01') {
+                console.log('⚠️ Таблица profiles не существует, создаем локальный профиль');
+            } else if (profileError) {
+                console.warn('⚠️ Ошибка обновления профиля:', profileError);
+            } else {
+                console.log('✅ Профиль обновлён:', { email: user.email, role });
+            }
+        } catch (dbError) {
+            console.log('⚠️ Таблица profiles недоступна, работаем с localStorage');
         }
         
         // Сохраняем в localStorage для быстрого доступа
@@ -87,8 +94,21 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
             const currentPath = window.location.pathname;
             
             // Не перенаправляем, если уже на нужной странице
-            if (role === 'client' && !currentPath.includes('client/dashboard.html') && currentPath.includes('auth/')) {
-                setTimeout(() => window.location.href = '/pages/client/dashboard.html', 500);
+            const dashboardPaths = {
+                'client': 'pages/client/dashboard.html',
+                'driver': 'pages/driver/dashboard.html',
+                'fleet': 'pages/fleet/dashboard.html',
+                'fleet_admin': 'pages/fleet/dashboard.html',
+                'fleet_dispatcher': 'pages/fleet/dashboard.html',
+                'system_admin': 'pages/admin/dashboard.html',
+                'system_moderator': 'pages/admin/dashboard.html',
+                'system_support': 'pages/admin/dashboard.html'
+            };
+            
+            const targetPath = dashboardPaths[role] || 'pages/client/dashboard.html';
+            
+            if (!currentPath.includes(targetPath) && currentPath.includes('auth/')) {
+                setTimeout(() => window.location.href = targetPath, 500);
             }
         }
     }
@@ -176,10 +196,10 @@ function handleQuickSearch() {
     
     if (userEmail) {
         console.log('✅ Пользователь авторизован, перенаправляем на создание заказа');
-        window.location.href = '/pages/orders/create.html';
+        window.location.href = 'pages/orders/create.html'; // БЕЗ слеша в начале!
     } else {
         console.log('❌ Пользователь не авторизован, перенаправляем на регистрацию');
-        window.location.href = '/pages/auth/register.html?action=quick_order';
+        window.location.href = 'pages/auth/register.html?action=quick_order'; // БЕЗ слеша!
     }
 }
 
@@ -202,7 +222,7 @@ async function logoutUser() {
         console.log('✅ Выход выполнен');
         
         // Перенаправляем на главную
-        window.location.href = '/index.html';
+        window.location.href = '/'; // Или 'index.html'
         
     } catch (error) {
         console.error('❌ Ошибка при выходе:', error);
@@ -239,12 +259,17 @@ function checkUserRole(requiredRole) {
 // Перенаправление по роли
 function redirectByRole(role) {
     const rolePaths = {
-        'client': '/pages/client/dashboard.html',
-        'driver': '/pages/driver/dashboard.html',
-        'fleet': '/pages/fleet/dashboard.html'
+        'client': 'pages/client/dashboard.html',        // БЕЗ слеша!
+        'driver': 'pages/driver/dashboard.html',
+        'fleet': 'pages/fleet/dashboard.html',
+        'fleet_admin': 'pages/fleet/dashboard.html',
+        'fleet_dispatcher': 'pages/fleet/dashboard.html',
+        'system_admin': 'pages/admin/dashboard.html',
+        'system_moderator': 'pages/admin/dashboard.html',
+        'system_support': 'pages/admin/dashboard.html'
     };
     
-    const path = rolePaths[role] || '/pages/client/dashboard.html';
+    const path = rolePaths[role] || 'pages/client/dashboard.html';
     
     // Проверяем, не находимся ли уже на нужной странице
     if (!window.location.pathname.includes(path)) {
