@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-config.js"></script>
+    <script src="supabase-config.js" defer></script>
 </head>
 <body>
     <!-- Навигация -->
@@ -20,7 +20,7 @@
             </a>
             
             <!-- Для неавторизованных пользователей -->
-            <div class="nav-links logged-out">
+            <div class="nav-links logged-out" style="display: flex;">
                 <a href="#how-it-works">Как работает</a>
                 <a href="#technics">Техника</a>
                 <a href="#pricing">Тарифы</a>
@@ -38,19 +38,23 @@
                 </a>
                 <div class="dropdown">
                     <button class="btn btn-outline dropdown-toggle">
-                        <i class="fas fa-user"></i> Меню
+                        <i class="fas fa-user"></i> <span class="user-name">Пользователь</span>
                     </button>
                     <div class="dropdown-menu">
+                        <a href="pages/client/dashboard.html" class="dropdown-item">
+                            <i class="fas fa-user"></i> Профиль
+                        </a>
+                        <div class="dropdown-divider"></div>
                         <a href="pages/driver/dashboard.html" class="dropdown-item">
                             <i class="fas fa-truck"></i> Кабинет водителя
                         </a>
                         <a href="pages/fleet/dashboard.html" class="dropdown-item">
                             <i class="fas fa-warehouse"></i> Кабинет автопарка
                         </a>
-                        <div class="dropdown-divider"></div>
-                        <a href="pages/client/dashboard.html" class="dropdown-item">
-                            <i class="fas fa-user"></i> Профиль
+                        <a href="pages/admin/dashboard.html" class="dropdown-item">
+                            <i class="fas fa-cog"></i> Админ панель
                         </a>
+                        <div class="dropdown-divider"></div>
                         <a href="#" onclick="logout()" class="dropdown-item">
                             <i class="fas fa-sign-out-alt"></i> Выйти
                         </a>
@@ -209,7 +213,6 @@
         </div>
     </footer>
 
-    <script src="app.js"></script>
     <script>
         // Функция быстрого поиска
         function handleQuickSearch() {
@@ -225,68 +228,79 @@
             sessionStorage.setItem('search_tech_type', techType);
             sessionStorage.setItem('search_location', location);
             
-            // Проверяем авторизацию
-            supabase.auth.getSession().then(({ data }) => {
-                if (data.session) {
-                    // Если авторизован - перенаправляем на создание заказа
-                    window.location.href = 'pages/orders/create.html';
-                } else {
-                    // Если не авторизован - на регистрацию
-                    window.location.href = 'pages/auth/register.html?action=quick_order';
-                }
-            });
+            // Проверяем авторизацию через localStorage
+            const authToken = localStorage.getItem('auth_token');
+            if (authToken) {
+                // Если авторизован - перенаправляем на создание заказа
+                window.location.href = 'pages/orders/create.html';
+            } else {
+                // Если не авторизован - на регистрацию
+                window.location.href = 'pages/auth/register.html?action=quick_order';
+            }
         }
         
         // Обработчики для кнопок регистрации
-        document.querySelectorAll('.role-card .btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                const url = new URL(this.href, window.location.origin);
-                const role = url.searchParams.get('role');
-                if (role) {
-                    sessionStorage.setItem('preferred_role', role);
-                }
-                window.location.href = this.href;
-            });
-        });
-        
-        // Dropdown меню
         document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.role-card .btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const url = new URL(this.href, window.location.origin);
+                    const role = url.searchParams.get('role');
+                    if (role) {
+                        sessionStorage.setItem('preferred_role', role);
+                    }
+                    window.location.href = this.href;
+                });
+            });
+            
+            // Dropdown меню
             const dropdowns = document.querySelectorAll('.dropdown');
             dropdowns.forEach(dropdown => {
                 const toggle = dropdown.querySelector('.dropdown-toggle');
                 const menu = dropdown.querySelector('.dropdown-menu');
                 
-                toggle.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-                });
-                
-                // Закрытие при клике вне меню
-                document.addEventListener('click', function() {
-                    menu.style.display = 'none';
-                });
-            });
-            
-            // Проверка авторизации при загрузке
-            supabase.auth.getSession().then(({ data }) => {
-                const loggedOut = document.querySelector('.logged-out');
-                const loggedIn = document.querySelector('.logged-in');
-                
-                if (data.session) {
-                    loggedOut.style.display = 'none';
-                    loggedIn.style.display = 'flex';
-                } else {
-                    loggedOut.style.display = 'flex';
-                    loggedIn.style.display = 'none';
+                if (toggle && menu) {
+                    toggle.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+                    });
+                    
+                    // Закрытие при клике вне меню
+                    document.addEventListener('click', function() {
+                        menu.style.display = 'none';
+                    });
                 }
             });
+            
+            // Проверяем наличие функции updateAuthUI
+            setTimeout(() => {
+                if (typeof window.updateAuthUI === 'function') {
+                    console.log('✅ updateAuthUI функция доступна');
+                } else {
+                    console.warn('⚠️ updateAuthUI функция не найдена');
+                    // Фоллбек: проверяем авторизацию вручную
+                    const authToken = localStorage.getItem('auth_token');
+                    const loggedOut = document.querySelector('.logged-out');
+                    const loggedIn = document.querySelector('.logged-in');
+                    
+                    if (authToken) {
+                        if (loggedOut) loggedOut.style.display = 'none';
+                        if (loggedIn) loggedIn.style.display = 'flex';
+                    } else {
+                        if (loggedOut) loggedOut.style.display = 'flex';
+                        if (loggedIn) loggedIn.style.display = 'none';
+                    }
+                }
+            }, 500);
         });
         
         // Функция выхода
         async function logout() {
-            const { error } = await supabase.auth.signOut();
-            if (!error) {
+            if (typeof window.logout === 'function') {
+                await window.logout();
+            } else {
+                console.warn('⚠️ Функция logout не найдена, выполняем очистку локально');
+                localStorage.clear();
                 window.location.reload();
             }
         }
