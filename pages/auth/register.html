@@ -226,28 +226,21 @@
             console.log('Выбрана роль:', role);
         }
         
-        // Функция перенаправления по роли (ТОЛЬКО С ЗАДЕРЖКОЙ)
+        // Функция перенаправления по роли
         function redirectByRole(role) {
-            console.log('⏳ Ожидание 4 секунды перед редиректом для роли:', role);
-            
-            // ВАЖНОЕ ИЗМЕНЕНИЕ: Добавляем задержку 4 секунды
-            setTimeout(() => {
-                console.log('✅ Выполняем редирект для:', role);
-                
-                switch(role) {
-                    case 'client':
-                        window.location.href = "../client/dashboard.html";
-                        break;
-                    case 'driver':
-                        window.location.href = "../driver/dashboard.html";
-                        break;
-                    case 'fleet':
-                        window.location.href = "../fleet/dashboard.html";
-                        break;
-                    default:
-                        window.location.href = "../client/dashboard.html";
-                }
-            }, 4000); // Задержка 4000ms = 4 секунды
+            switch(role) {
+                case 'client':
+                    window.location.href = "../client/dashboard.html";
+                    break;
+                case 'driver':
+                    window.location.href = "../driver/dashboard.html";
+                    break;
+                case 'fleet':
+                    window.location.href = "../fleet/dashboard.html";
+                    break;
+                default:
+                    window.location.href = "../client/dashboard.html";
+            }
         }
         
         // Обработка формы регистрации
