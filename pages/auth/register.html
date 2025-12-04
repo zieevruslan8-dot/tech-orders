@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Регистрация | ТехноАггрегатор</title>
-    <link rel="stylesheet" href="../../style.css">
+    <!-- Исправленные пути для корневой структуры -->
+    <link rel="stylesheet" href="/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* Все ваши стили остаются без изменений */
         .role-selection {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -105,6 +107,11 @@
             background: #27ae60;
         }
         
+        .register-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        
         .login-link {
             text-align: center;
             margin-top: 20px;
@@ -116,17 +123,34 @@
             text-decoration: none;
             font-weight: 600;
         }
+        
+        .error-message {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
     <nav class="navbar">
         <div class="container">
-            <a href="../../index.html" class="logo">
+            <a href="/index.html" class="logo">
                 <i class="fas fa-truck-monster"></i>
                 <span>ТехноАггрегатор</span>
             </a>
             <div class="nav-links">
-                <a href="../../index.html">Главная</a>
+                <a href="/index.html">Главная</a>
                 <a href="login.html">Вход</a>
             </div>
         </div>
@@ -178,21 +202,44 @@
             
             <form id="registerForm">
                 <div class="form-group">
-                    <label for="firstName">Имя</label>
-                    <input type="text" id="firstName" required placeholder="Как к вам обращаться?">
+                    <label for="fullName">Полное имя</label>
+                    <input type="text" id="fullName" required placeholder="Иванов Иван Иванович">
+                    <div id="fullNameError" class="error-message"></div>
                 </div>
                 
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input type="email" id="email" required placeholder="ваш@email.com">
+                    <div id="emailError" class="error-message"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Телефон (необязательно)</label>
+                    <input type="tel" id="phone" placeholder="+7 (999) 123-45-67">
                 </div>
                 
                 <div class="form-group">
                     <label for="password">Пароль</label>
                     <input type="password" id="password" required placeholder="Не менее 6 символов" minlength="6">
+                    <div id="passwordError" class="error-message"></div>
                 </div>
                 
-                <button type="submit" class="register-btn">
+                <div class="form-group">
+                    <label for="confirmPassword">Подтвердите пароль</label>
+                    <input type="password" id="confirmPassword" required placeholder="Повторите пароль">
+                    <div id="confirmPasswordError" class="error-message"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="agreeTerms" required>
+                        Я согласен с <a href="#" style="color: #3498db;">правилами использования</a> и 
+                        <a href="#" style="color: #3498db;">политикой конфиденциальности</a>
+                    </label>
+                    <div id="termsError" class="error-message"></div>
+                </div>
+                
+                <button type="submit" class="register-btn" id="submitBtn">
                     <i class="fas fa-user-plus"></i> Создать аккаунт
                 </button>
             </form>
@@ -205,7 +252,7 @@
 
     <!-- Подключение JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../../supabase-config.js"></script>
+    <script src="/supabase-config.js" defer></script>
     
     <!-- Скрипт регистрации -->
     <script>
@@ -226,75 +273,172 @@
             console.log('Выбрана роль:', role);
         }
         
-        // Функция перенаправления по роли
-        function redirectByRole(role) {
-            switch(role) {
-                case 'client':
-                    window.location.href = "../client/dashboard.html";
-                    break;
-                case 'driver':
-                    window.location.href = "../driver/dashboard.html";
-                    break;
-                case 'fleet':
-                    window.location.href = "../fleet/dashboard.html";
-                    break;
-                default:
-                    window.location.href = "../client/dashboard.html";
+        // Показать ошибку
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+        
+        // Скрыть ошибку
+        function hideError(elementId) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.style.display = 'none';
+        }
+        
+        // Валидация формы
+        function validateForm() {
+            let isValid = true;
+            
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const agreeTerms = document.getElementById('agreeTerms').checked;
+            
+            // Валидация имени
+            if (!fullName) {
+                showError('fullNameError', 'Пожалуйста, введите ваше имя');
+                isValid = false;
+            } else {
+                hideError('fullNameError');
             }
+            
+            // Валидация email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email) {
+                showError('emailError', 'Пожалуйста, введите email');
+                isValid = false;
+            } else if (!emailRegex.test(email)) {
+                showError('emailError', 'Пожалуйста, введите корректный email');
+                isValid = false;
+            } else {
+                hideError('emailError');
+            }
+            
+            // Валидация пароля
+            if (!password) {
+                showError('passwordError', 'Пожалуйста, введите пароль');
+                isValid = false;
+            } else if (password.length < 6) {
+                showError('passwordError', 'Пароль должен содержать не менее 6 символов');
+                isValid = false;
+            } else {
+                hideError('passwordError');
+            }
+            
+            // Подтверждение пароля
+            if (!confirmPassword) {
+                showError('confirmPasswordError', 'Пожалуйста, подтвердите пароль');
+                isValid = false;
+            } else if (password !== confirmPassword) {
+                showError('confirmPasswordError', 'Пароли не совпадают');
+                isValid = false;
+            } else {
+                hideError('confirmPasswordError');
+            }
+            
+            // Согласие с условиями
+            if (!agreeTerms) {
+                showError('termsError', 'Необходимо согласиться с условиями');
+                isValid = false;
+            } else {
+                hideError('termsError');
+            }
+            
+            return isValid;
+        }
+        
+        // Функция перенаправления по роли
+        function redirectByRole(role, userData) {
+            console.log('Перенаправление для роли:', role);
+            
+            // Добавляем задержку для надежности
+            setTimeout(() => {
+                const dashboardPaths = {
+                    'client': '/pages/client/dashboard.html',
+                    'driver': '/pages/driver/dashboard.html',
+                    'fleet': '/pages/fleet/dashboard.html',
+                    'fleet_admin': '/pages/fleet/dashboard.html',
+                    'fleet_dispatcher': '/pages/fleet/dashboard.html'
+                };
+                
+                const redirectPath = dashboardPaths[role] || '/pages/client/dashboard.html';
+                
+                // Показываем сообщение об успехе
+                const messageDiv = document.createElement('div');
+                messageDiv.style.cssText = 'text-align: center; padding: 20px; background: #e8f5e9; border-radius: 10px; margin-top: 20px;';
+                messageDiv.innerHTML = `
+                    <h3 style="color: #2ecc71;">✅ Регистрация успешна!</h3>
+                    <p>Создаем ваш профиль...</p>
+                    <p>Перенаправление через 3 секунды</p>
+                `;
+                
+                const formSection = document.querySelector('.form-section');
+                if (formSection) {
+                    formSection.parentNode.insertBefore(messageDiv, formSection.nextSibling);
+                }
+                
+                // Перенаправление
+                setTimeout(() => {
+                    window.location.href = redirectPath;
+                }, 3000);
+                
+            }, 1000);
         }
         
         // Обработка формы регистрации
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const firstName = document.getElementById('firstName').value;
-            const email = document.getElementById('email').value;
+            if (!validateForm()) {
+                return;
+            }
+            
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
             const password = document.getElementById('password').value;
             const role = document.getElementById('role').value;
             
-            // Валидация
-            if (!firstName || !email || !password) {
-                alert('Пожалуйста, заполните все поля');
-                return;
-            }
-            
-            if (password.length < 6) {
-                alert('Пароль должен содержать не менее 6 символов');
-                return;
-            }
-            
             try {
                 // Показываем загрузку
-                const submitBtn = document.querySelector('.register-btn');
+                const submitBtn = document.getElementById('submitBtn');
                 const originalText = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Регистрируем...';
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin loading-spinner"></i> Регистрация...';
                 submitBtn.disabled = true;
                 
-                // 1. РЕГИСТРАЦИЯ
+                console.log('Начинаем регистрацию для:', email, 'роль:', role);
+                
+                // 1. РЕГИСТРАЦИЯ В SUPABASE AUTH
                 const { data: authData, error: authError } = await supabase.auth.signUp({
                     email: email,
                     password: password,
                     options: {
                         data: {
-                            first_name: firstName,
-                            role: role
+                            full_name: fullName,
+                            role: role,
+                            phone: phone || null
                         }
                     }
                 });
                 
                 if (authError) {
-                    // Если пользователь уже существует
+                    console.error('Ошибка регистрации:', authError);
+                    
+                    // Проверяем, если пользователь уже существует
                     if (authError.message.includes('already registered') || 
-                        authError.message.includes('User already registered')) {
+                        authError.message.includes('User already registered') ||
+                        authError.code === 'user_already_exists') {
                         
-                        // Пробуем войти с этими данными
+                        // Пробуем войти
                         const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
                             email: email,
                             password: password
                         });
                         
                         if (signInError) {
-                            alert('Пользователь уже существует, но пароль неверный.');
+                            showError('emailError', 'Пользователь уже существует с другим паролем');
                             submitBtn.innerHTML = originalText;
                             submitBtn.disabled = false;
                             return;
@@ -303,10 +447,29 @@
                         // Сохраняем данные
                         localStorage.setItem('user_role', role);
                         localStorage.setItem('user_email', email);
-                        localStorage.setItem('user_name', firstName);
+                        localStorage.setItem('user_name', fullName);
+                        
+                        // Создаем или обновляем профиль
+                        if (signInData.user) {
+                            const { error: profileError } = await supabase
+                                .from('profiles')
+                                .upsert({
+                                    id: signInData.user.id,
+                                    email: email,
+                                    full_name: fullName,
+                                    phone: phone || null,
+                                    role: role,
+                                    created_at: new Date().toISOString(),
+                                    updated_at: new Date().toISOString()
+                                });
+                            
+                            if (profileError) {
+                                console.warn('Ошибка обновления профиля:', profileError);
+                            }
+                        }
                         
                         // Перенаправляем
-                        redirectByRole(role);
+                        redirectByRole(role, signInData.user);
                         return;
                     }
                     
@@ -316,57 +479,74 @@
                     return;
                 }
                 
-                // 2. СРАЗУ ВХОДИМ ПОСЛЕ РЕГИСТРАЦИИ
+                // 2. ВХОД ПОСЛЕ РЕГИСТРАЦИИ
                 const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
                     email: email,
                     password: password
                 });
                 
                 if (signInError) {
-                    alert('Регистрация успешна, но вход не удался: ' + signInError.message + '\n\nПопробуйте войти вручную.');
+                    alert('Регистрация успешна, но вход не удался: ' + signInError.message);
                     window.location.href = "login.html";
                     return;
                 }
                 
-                // 3. СОЗДАЁМ ПРОФИЛЬ
+                // 3. СОЗДАНИЕ ПРОФИЛЯ
                 if (signInData.user) {
-                    const { error: profileError } = await supabase
-                        .from('profiles')
-                        .upsert({
-                            id: signInData.user.id,
-                            email: email,
-                            first_name: firstName,
-                            role: role,
-                            created_at: new Date().toISOString(),
-                            updated_at: new Date().toISOString()
-                        });
-                    
-                    if (profileError) {
-                        console.warn('Предупреждение (профиль):', profileError);
+                    try {
+                        const { error: profileError } = await supabase
+                            .from('profiles')
+                            .upsert({
+                                id: signInData.user.id,
+                                email: email,
+                                full_name: fullName,
+                                phone: phone || null,
+                                role: role,
+                                created_at: new Date().toISOString(),
+                                updated_at: new Date().toISOString()
+                            });
+                        
+                        if (profileError) {
+                            console.warn('Предупреждение при создании профиля:', profileError);
+                        } else {
+                            console.log('Профиль создан успешно');
+                        }
+                    } catch (profileErr) {
+                        console.warn('Ошибка создания профиля (не критично):', profileErr);
                     }
                 }
                 
-                // 4. СОХРАНЯЕМ ДАННЫЕ И ПЕРЕНАПРАВЛЯЕМ
-                localStorage.setItem('user_role', role);
-                localStorage.setItem('user_email', email);
-                localStorage.setItem('user_name', firstName);
-                
-                // Красивое сообщение
+                // 4. УВЕДОМЛЕНИЕ ОБ УСПЕХЕ
                 const roleNames = {
                     'client': 'клиента',
                     'driver': 'водителя',
                     'fleet': 'автопарка'
                 };
                 
-                alert(`✅ Регистрация успешна!\nДобро пожаловать, ${firstName}!\nВы зарегистрированы как ${roleNames[role]}.`);
-                redirectByRole(role);
+                // Создаем уведомление
+                const successDiv = document.createElement('div');
+                successDiv.style.cssText = 'text-align: center; padding: 20px; background: #e8f5e9; border-radius: 10px; margin-top: 20px;';
+                successDiv.innerHTML = `
+                    <h3 style="color: #2ecc71;">✅ Регистрация успешна!</h3>
+                    <p>Добро пожаловать, ${fullName}!</p>
+                    <p>Вы зарегистрированы как ${roleNames[role]}.</p>
+                    <p>Перенаправление на дашборд...</p>
+                `;
+                
+                const formSection = document.querySelector('.form-section');
+                if (formSection) {
+                    formSection.parentNode.insertBefore(successDiv, formSection.nextSibling);
+                }
+                
+                // 5. ПЕРЕНАПРАВЛЕНИЕ
+                redirectByRole(role, signInData.user);
                 
             } catch (error) {
-                alert('Ошибка: ' + error.message);
-                console.error('Полная ошибка:', error);
+                console.error('Критическая ошибка:', error);
+                alert('Произошла ошибка: ' + error.message);
                 
                 // Восстанавливаем кнопку
-                const submitBtn = document.querySelector('.register-btn');
+                const submitBtn = document.getElementById('submitBtn');
                 submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Создать аккаунт';
                 submitBtn.disabled = false;
             }
@@ -374,17 +554,22 @@
         
         // Проверяем, если уже авторизован
         document.addEventListener('DOMContentLoaded', async () => {
-            const { data } = await supabase.auth.getSession();
-            if (data.session) {
-                const savedRole = localStorage.getItem('user_role') || 'client';
-                redirectByRole(savedRole);
-            }
-            
-            // Автоматически выбираем роль из URL параметра
-            const urlParams = new URLSearchParams(window.location.search);
-            const roleFromUrl = urlParams.get('role');
-            if (roleFromUrl && ['client', 'driver', 'fleet'].includes(roleFromUrl)) {
-                selectRole(roleFromUrl);
+            try {
+                const { data } = await supabase.auth.getSession();
+                if (data && data.session) {
+                    console.log('Уже авторизован, перенаправление...');
+                    const savedRole = localStorage.getItem('user_role') || 'client';
+                    redirectByRole(savedRole);
+                }
+                
+                // Автоматически выбираем роль из URL параметра
+                const urlParams = new URLSearchParams(window.location.search);
+                const roleFromUrl = urlParams.get('role');
+                if (roleFromUrl && ['client', 'driver', 'fleet'].includes(roleFromUrl)) {
+                    selectRole(roleFromUrl);
+                }
+            } catch (error) {
+                console.error('Ошибка проверки сессии:', error);
             }
         });
     </script>
