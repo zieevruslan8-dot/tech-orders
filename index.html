@@ -24,27 +24,23 @@
                 <a href="#how-it-works">Как работает</a>
                 <a href="#technics">Техника</a>
                 <a href="#pricing">Тарифы</a>
-                <!-- ИЗМЕНЕНО: Исправлены пути -->
                 <a href="pages/auth/login.html" class="btn btn-outline">Войти</a>
                 <a href="pages/auth/register.html" class="btn btn-primary">Регистрация</a>
             </div>
             
             <!-- Для авторизованных пользователей -->
             <div class="nav-links logged-in" style="display: none;">
-                <!-- ИЗМЕНЕНО: Исправлены пути -->
                 <a href="pages/client/dashboard.html" class="btn btn-outline">
                     <i class="fas fa-tachometer-alt"></i> Личный кабинет
                 </a>
                 <a href="pages/orders/create.html" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Новый заказ
                 </a>
-                <!-- ДОБАВЛЕНО: Ссылки для других ролей -->
                 <div class="dropdown">
                     <button class="btn btn-outline dropdown-toggle">
                         <i class="fas fa-user"></i> Меню
                     </button>
                     <div class="dropdown-menu">
-                        <!-- ИЗМЕНЕНО: Исправлены пути -->
                         <a href="pages/driver/dashboard.html" class="dropdown-item">
                             <i class="fas fa-truck"></i> Кабинет водителя
                         </a>
@@ -95,19 +91,6 @@
                     <i class="fas fa-search"></i> Найти технику
                 </button>
             </div>
-            
-            <!-- ДОБАВЛЕНО: Быстрые ссылки для тестирования -->
-            <div class="quick-links" style="margin-top: 30px; text-align: center;">
-                <p style="color: #666; margin-bottom: 10px;">Тестовые страницы:</p>
-                <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
-                    <a href="pages/auth/login.html" class="btn btn-sm btn-outline">Вход</a>
-                    <a href="pages/auth/register.html" class="btn btn-sm btn-outline">Регистрация</a>
-                    <a href="pages/client/dashboard.html" class="btn btn-sm btn-outline">Кабинет клиента</a>
-                    <a href="pages/driver/dashboard.html" class="btn btn-sm btn-outline">Кабинет водителя</a>
-                    <a href="pages/fleet/dashboard.html" class="btn btn-sm btn-outline">Кабинет автопарка</a>
-                    <a href="pages/orders/create.html" class="btn btn-sm btn-outline">Создать заказ</a>
-                </div>
-            </div>
         </div>
     </section>
 
@@ -149,31 +132,28 @@
                     <i class="fas fa-hard-hat"></i>
                     <h3>Заказчики</h3>
                     <p>Строительные компании, частные лица, организации</p>
-                    <!-- ИЗМЕНЕНО: Исправлен путь -->
                     <a href="pages/auth/register.html?role=client" class="btn btn-outline">Стать заказчиком</a>
                 </div>
                 <div class="role-card">
                     <i class="fas fa-truck"></i>
                     <h3>Водители</h3>
                     <p>Ищите заказы, работайте с проверенными клиентами</p>
-                    <!-- ИЗМЕНЕНО: Исправлен путь -->
                     <a href="pages/auth/register.html?role=driver" class="btn btn-outline">Стать водителем</a>
                 </div>
                 <div class="role-card">
                     <i class="fas fa-warehouse"></i>
                     <h3>Парки техники</h3>
                     <p>Привлекайте клиентов, управляйте автопарком</p>
-                    <!-- ИЗМЕНЕНО: Исправлен путь -->
                     <a href="pages/auth/register.html?role=fleet" class="btn btn-outline">Добавить парк</a>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ДОБАВЛЕНО: Информация о страницах -->
+    <!-- Доступные разделы -->
     <section class="section">
         <div class="container">
-            <h2 class="section-title">Доступные страницы</h2>
+            <h2 class="section-title">Доступные разделы</h2>
             <div class="pages-grid">
                 <div class="page-card">
                     <h3><i class="fas fa-sign-in-alt"></i> Авторизация</h3>
@@ -218,7 +198,6 @@
                 </div>
                 <div class="footer-section">
                     <h4>Навигация</h4>
-                    <!-- ДОБАВЛЕНО: Ссылки на страницы -->
                     <a href="pages/auth/login.html">Вход в систему</a>
                     <a href="pages/auth/register.html">Регистрация</a>
                     <a href="pages/client/dashboard.html">Личный кабинет</a>
@@ -293,14 +272,10 @@
             supabase.auth.getSession().then(({ data }) => {
                 const loggedOut = document.querySelector('.logged-out');
                 const loggedIn = document.querySelector('.logged-in');
-                const userEmail = document.querySelector('.user-email');
                 
                 if (data.session) {
                     loggedOut.style.display = 'none';
                     loggedIn.style.display = 'flex';
-                    if (userEmail) {
-                        userEmail.textContent = data.session.user.email || 'user@example.com';
-                    }
                 } else {
                     loggedOut.style.display = 'flex';
                     loggedIn.style.display = 'none';
@@ -317,7 +292,6 @@
         }
     </script>
     
-    <!-- ДОБАВЛЕНО: Стили для новых элементов -->
     <style>
         .dropdown {
             position: relative;
