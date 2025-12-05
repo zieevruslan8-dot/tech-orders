@@ -6,16 +6,20 @@
     <title>ТехноАггрегатор - Заказ спецтехники</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
 </head>
 <body>
+    <!-- Навигация -->
     <nav class="navbar">
         <div class="container">
             <a href="/" class="logo">
                 <i class="fas fa-truck-monster"></i>
                 <span>ТехноАггрегатор</span>
             </a>
+            
+            <!-- Для неавторизованных пользователей -->
             <div class="nav-links logged-out">
                 <a href="#how-it-works">Как работает</a>
                 <a href="#technics">Техника</a>
@@ -23,6 +27,8 @@
                 <a href="pages/auth/login.html" class="btn btn-outline">Войти</a>
                 <a href="pages/auth/register.html" class="btn btn-primary">Регистрация</a>
             </div>
+            
+            <!-- Для авторизованных пользователей -->
             <div class="nav-links logged-in" style="display: none;">
                 <a href="pages/client/dashboard.html" class="btn btn-outline">
                     <i class="fas fa-tachometer-alt"></i> Личный кабинет
@@ -54,11 +60,13 @@
         </div>
     </nav>
 
+    <!-- Герой секция -->
     <section class="hero">
         <div class="container">
             <h1>Закажите спецтехнику за 5 минут</h1>
             <p class="subtitle">Экскаваторы, краны, грузовики и другая техника от проверенных парков</p>
             
+            <!-- Форма быстрого заказа -->
             <div class="quick-order-form">
                 <div class="form-group">
                     <label for="tech-type"><i class="fas fa-truck-pickup"></i> Тип техники</label>
@@ -67,11 +75,17 @@
                         <option value="excavator">Экскаватор</option>
                         <option value="crane">Кран</option>
                         <option value="truck">Грузовик</option>
+                        <option value="bulldozer">Бульдозер</option>
+                        <option value="loader">Погрузчик</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="location"><i class="fas fa-map-marker-alt"></i> Местоположение</label>
                     <input type="text" id="location" placeholder="Куда доставить технику?">
+                </div>
+                <div class="form-group">
+                    <label for="date"><i class="fas fa-calendar-alt"></i> Дата работы</label>
+                    <input type="date" id="date">
                 </div>
                 <button class="btn btn-primary btn-large" onclick="handleQuickSearch()">
                     <i class="fas fa-search"></i> Найти технику
@@ -80,6 +94,96 @@
         </div>
     </section>
 
+    <!-- Как работает -->
+    <section id="how-it-works" class="section">
+        <div class="container">
+            <h2 class="section-title">Как это работает</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-icon">1</div>
+                    <h3>Создайте заказ</h3>
+                    <p>Опишите задачу и выберите тип техники</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">2</div>
+                    <h3>Получите предложения</h3>
+                    <p>Парки техники отправят вам свои цены</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">3</div>
+                    <h3>Выберите исполнителя</h3>
+                    <p>Сравните цены и отзывы, выберите лучший вариант</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">4</div>
+                    <h3>Работайте безопасно</h3>
+                    <p>Все платежи через платформу с гарантией</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Роли пользователей -->
+    <section class="section bg-light">
+        <div class="container">
+            <h2 class="section-title">Для кого наша платформа</h2>
+            <div class="roles">
+                <div class="role-card">
+                    <i class="fas fa-hard-hat"></i>
+                    <h3>Заказчики</h3>
+                    <p>Строительные компании, частные лица, организации</p>
+                    <a href="pages/auth/register.html?role=client" class="btn btn-outline">Стать заказчиком</a>
+                </div>
+                <div class="role-card">
+                    <i class="fas fa-truck"></i>
+                    <h3>Водители</h3>
+                    <p>Ищите заказы, работайте с проверенными клиентами</p>
+                    <a href="pages/auth/register.html?role=driver" class="btn btn-outline">Стать водителем</a>
+                </div>
+                <div class="role-card">
+                    <i class="fas fa-warehouse"></i>
+                    <h3>Парки техники</h3>
+                    <p>Привлекайте клиентов, управляйте автопарком</p>
+                    <a href="pages/auth/register.html?role=fleet" class="btn btn-outline">Добавить парк</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Доступные разделы -->
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">Доступные разделы</h2>
+            <div class="pages-grid">
+                <div class="page-card">
+                    <h3><i class="fas fa-sign-in-alt"></i> Авторизация</h3>
+                    <p>Вход и регистрация в системе</p>
+                    <div class="page-links">
+                        <a href="pages/auth/login.html" class="btn btn-sm">Вход</a>
+                        <a href="pages/auth/register.html" class="btn btn-sm">Регистрация</a>
+                    </div>
+                </div>
+                <div class="page-card">
+                    <h3><i class="fas fa-tachometer-alt"></i> Личные кабинеты</h3>
+                    <p>Управление заказами и профилем</p>
+                    <div class="page-links">
+                        <a href="pages/client/dashboard.html" class="btn btn-sm">Клиент</a>
+                        <a href="pages/driver/dashboard.html" class="btn btn-sm">Водитель</a>
+                        <a href="pages/fleet/dashboard.html" class="btn btn-sm">Автопарк</a>
+                    </div>
+                </div>
+                <div class="page-card">
+                    <h3><i class="fas fa-plus-circle"></i> Заказы</h3>
+                    <p>Создание и управление заказами</p>
+                    <div class="page-links">
+                        <a href="pages/orders/create.html" class="btn btn-sm">Создать заказ</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Футер -->
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
@@ -92,37 +196,187 @@
                     <p><i class="fas fa-phone"></i> 8-800-123-45-67</p>
                     <p><i class="fas fa-envelope"></i> info@tech-aggregator.ru</p>
                 </div>
+                <div class="footer-section">
+                    <h4>Навигация</h4>
+                    <a href="pages/auth/login.html">Вход в систему</a>
+                    <a href="pages/auth/register.html">Регистрация</a>
+                    <a href="pages/client/dashboard.html">Личный кабинет</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2024 ТехноАггрегатор. Все права защищены.</p>
             </div>
         </div>
     </footer>
 
     <script src="app.js"></script>
     <script>
+        // Функция быстрого поиска
         function handleQuickSearch() {
             const techType = document.getElementById('tech-type').value;
             const location = document.getElementById('location').value;
             
             if (!techType || !location) {
-                alert('Заполните все поля');
+                alert('Пожалуйста, заполните тип техники и местоположение');
                 return;
             }
             
+            // Сохраняем параметры поиска
             sessionStorage.setItem('search_tech_type', techType);
             sessionStorage.setItem('search_location', location);
             
+            // Проверяем авторизацию
             supabase.auth.getSession().then(({ data }) => {
                 if (data.session) {
+                    // Если авторизован - перенаправляем на создание заказа
                     window.location.href = 'pages/orders/create.html';
                 } else {
+                    // Если не авторизован - на регистрацию
                     window.location.href = 'pages/auth/register.html?action=quick_order';
                 }
             });
         }
         
+        // Обработчики для кнопок регистрации
+        document.querySelectorAll('.role-card .btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const url = new URL(this.href, window.location.origin);
+                const role = url.searchParams.get('role');
+                if (role) {
+                    sessionStorage.setItem('preferred_role', role);
+                }
+                window.location.href = this.href;
+            });
+        });
+        
+        // Dropdown меню
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdowns = document.querySelectorAll('.dropdown');
+            dropdowns.forEach(dropdown => {
+                const toggle = dropdown.querySelector('.dropdown-toggle');
+                const menu = dropdown.querySelector('.dropdown-menu');
+                
+                toggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+                });
+                
+                // Закрытие при клике вне меню
+                document.addEventListener('click', function() {
+                    menu.style.display = 'none';
+                });
+            });
+            
+            // Проверка авторизации при загрузке
+            supabase.auth.getSession().then(({ data }) => {
+                const loggedOut = document.querySelector('.logged-out');
+                const loggedIn = document.querySelector('.logged-in');
+                
+                if (data.session) {
+                    loggedOut.style.display = 'none';
+                    loggedIn.style.display = 'flex';
+                } else {
+                    loggedOut.style.display = 'flex';
+                    loggedIn.style.display = 'none';
+                }
+            });
+        });
+        
+        // Функция выхода
         async function logout() {
-            await supabaseClient.auth.signOut();
-            window.location.reload();
+            const { error } = await supabase.auth.signOut();
+            if (!error) {
+                window.location.reload();
+            }
         }
     </script>
+    
+    <style>
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: white;
+            min-width: 200px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 10px 0;
+            z-index: 1000;
+        }
+        
+        .dropdown-item {
+            display: block;
+            padding: 10px 20px;
+            color: #333;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        
+        .dropdown-item:hover {
+            background: #f5f5f5;
+        }
+        
+        .dropdown-divider {
+            height: 1px;
+            background: #eee;
+            margin: 8px 0;
+        }
+        
+        .pages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .page-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .page-card h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .page-links {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-links {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            
+            .dropdown-menu {
+                position: static;
+                box-shadow: none;
+            }
+        }
+    </style>
 </body>
 </html>
