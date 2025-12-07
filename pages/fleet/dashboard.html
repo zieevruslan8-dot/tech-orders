@@ -149,6 +149,12 @@
                         <option value="tractor">Трактор</option>
                     </select>
                 </div>
+                <!-- ДОБАВЛЕНО ПОЛЕ МОДЕЛИ -->
+                <div style="margin-bottom: 15px;">
+                    <label>Модель техники:</label>
+                    <input type="text" id="vehicleModel" required style="width: 100%; padding: 10px;" 
+                           placeholder="Например: CAT 320D">
+                </div>
                 <div style="margin-bottom: 15px;">
                     <label>Гос. номер:</label>
                     <input type="text" id="licensePlate" style="width: 100%; padding: 10px;" placeholder="А123БВ777">
@@ -214,7 +220,7 @@
                         <div class="vehicle-card">
                             <div class="vehicle-info">
                                 <h4>${vehicle.name}</h4>
-                                <p>Тип: ${getVehicleTypeName(vehicle.type)} | Гос. номер: ${vehicle.license_plate || 'не указан'}</p>
+                                <p>Тип: ${getVehicleTypeName(vehicle.type)} | Модель: ${vehicle.model || 'не указана'} | Гос. номер: ${vehicle.license_plate || 'не указан'}</p>
                             </div>
                             <div>
                                 <span class="vehicle-status status-${vehicle.status}">${getVehicleStatusName(vehicle.status)}</span>
@@ -259,28 +265,39 @@
             }
         }
         
+        // ИСПРАВЛЕННАЯ ФУНКЦИЯ ДОБАВЛЕНИЯ ТЕХНИКИ
         document.getElementById('addVehicleForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const name = document.getElementById('vehicleName').value;
             const type = document.getElementById('vehicleType').value;
+            const model = document.getElementById('vehicleModel').value; // НОВОЕ ПОЛЕ
             const licensePlate = document.getElementById('licensePlate').value;
             const status = document.getElementById('vehicleStatus').value;
             
-            const { error } = await supabase
+            console.log('Данные для отправки:', {
+                name, type, model, license_plate: licensePlate, status, fleet_id: fleetId
+            });
+            
+            // ДОБАВЛЕНО ПОЛЕ model В ЗАПРОС
+            const { data, error } = await supabase
                 .from('vehicles')
                 .insert({
                     name: name,
                     type: type,
+                    model: model, // ВАЖНО: добавляем поле model
                     license_plate: licensePlate,
                     status: status,
                     fleet_id: fleetId,
                     created_at: new Date()
-                });
+                })
+                .select(); // Добавляем .select() чтобы увидеть результат
             
             if (error) {
+                console.error('Ошибка при добавлении техники:', error);
                 alert('Ошибка: ' + error.message);
             } else {
+                console.log('Техника успешно добавлена:', data);
                 alert('Техника успешно добавлена!');
                 hideAddVehicleModal();
                 loadFleetData();
@@ -373,6 +390,29 @@
         document.getElementById('addVehicleModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 hideAddVehicleModal();
+            }
+        });
+        
+        // Автоматическое заполнение поля модели при выборе типа
+        document.getElementById('vehicleType').addEventListener('change', function() {
+            const modelInput = document.getElementById('vehicleModel');
+            const type = this.value;
+            
+            // Примеры моделей по типам техники
+            const modelExamples = {
+                'excavator': 'CAT 320D',
+                'truck': 'КАМАЗ-65115',
+                'crane': 'Галичанин 25т',
+                'bulldozer': 'Б-10М',
+                'loader': 'Амкодор 342С',
+                'concrete_mixer': 'КАМАЗ-65201',
+                'tractor': 'МТЗ-82'
+            };
+            
+            // Если поле модели пустое или содержит старое значение, подставляем пример
+            if (!modelInput.value || modelInput.value.includes('Пример:')) {
+                modelInput.value = modelExamples[type] || '';
+                modelInput.placeholder = 'Например: ' + (modelExamples[type] || 'Укажите модель');
             }
         });
     </script>
